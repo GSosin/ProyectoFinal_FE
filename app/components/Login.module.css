@@ -1,0 +1,124 @@
+/* Contenedor principal - Centra el formulario de login en la pantalla */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+/* Tarjeta contenedora - Define el ancho máximo y el estilo visual del contenedor del formulario */
+.card {
+    width: 100%;
+    max-width: 500px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background: white;
+}
+
+/* Título de la tarjeta - Estiliza el título principal del formulario */
+.card :global(.p-card-title) {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Contenedor del formulario - Organiza los campos en columna con espaciado */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+/* Ícono del campo - Estiliza el contenedor del ícono a la izquierda del campo */
+.form :global(.p-inputgroup-addon) {
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #6c757d;
+    min-width: 2.357rem;
+    padding: 0 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Campo de email - Establece la altura del campo de email */
+.form :global(.p-inputtext) {
+    height: 3rem !important;
+}
+
+/* Campo de contraseña - Ajusta el estilo del campo de contraseña para que se alinee con el ícono */
+.passwordField :global(.p-password-input) {
+    width: 100%;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: 0;
+}
+
+/* Botón de envío - Estiliza el botón principal del formulario */
+.form :global(.p-button) {
+    margin-top: 1rem;
+    background-color: #2196F3;
+    border: none;
+    height: 3rem;
+    width: 50%;
+}
+
+/* Hover del botón - Efecto al pasar el mouse sobre el botón */
+.form :global(.p-button:hover) {
+    background-color: #1976D2;
+}
+
+/* Texto de registro - Estiliza el texto que invita a registrarse */
+.registerText {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+}
+
+/* Enlace de registro - Estiliza el enlace para ir a la página de registro */
+.registerLink {
+    color: #2196F3;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* Hover del enlace - Efecto al pasar el mouse sobre el enlace */
+.registerLink:hover {
+    color: #1976D2;
+}
+
+/* Campo de entrada - Establece dimensiones base para los campos */
+.input {
+    width: 100%;
+    height: 3rem;
+}
+
+/* Campo de contraseña - Estilos específicos para el campo de contraseña */
+.form :global(.p-password-input) {
+    width: 100% !important;
+    height: 3rem !important;
+    padding-right: 4.5rem !important;
+}
+
+/* Ícono de mostrar/ocultar contraseña - Posiciona y estiliza el botón de toggle */
+.form :global(.p-password .p-input-icon) {
+    position: absolute !important;
+    right: 0 !important;
+    top: 0 !important;
+    height: 100% !important;
+    width: 3rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
