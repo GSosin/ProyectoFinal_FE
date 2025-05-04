@@ -1,8 +1,16 @@
 'use client';
 
-import Login from './components/Login';
-import Register from './components/Register'
+import { useEffect } from 'react';
+import Login from './login/page';
+import Welcome from './welcome/page';
+import useAuthStore from './store/authStore';
 
 export default function Home() {
-    return <Login />;
+    const { isLoggedIn, checkAuth } = useAuthStore();
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    return isLoggedIn ? <Welcome /> : <Login />;
 } 
