@@ -24,7 +24,7 @@ export const handleApiError = (error) => {
 
         switch (status) {
             case 400:
-                message = data.message || 'Datos inválidos';
+                message = data.error.message || 'Datos inválidos';
                 break;
             case 401:
                 message = 'No autorizado. Por favor, inicia sesión nuevamente';
