@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Alert, Button } from '@mui/material';
+import { TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Alert, Button, FormHelperText } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
@@ -113,7 +113,7 @@ const Form = ({
         switch (field.type) {
             case 'password':
                 return (
-                    <FormControl variant="outlined" fullWidth>
+                    <FormControl variant="outlined" fullWidth error={!!error}>
                         <InputLabel htmlFor={`outlined-adornment-${field.name}`}>
                             {field.label}
                         </InputLabel>
@@ -134,6 +134,7 @@ const Form = ({
                             }
                             label={field.label}
                         />
+                        {error && <FormHelperText error>{error}</FormHelperText>}
                     </FormControl>
                 );
             case 'date':
