@@ -84,7 +84,7 @@
 .registerLink {
     color: #2196F3;
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 /* Hover del enlace - Efecto al pasar el mouse sobre el enlace */
