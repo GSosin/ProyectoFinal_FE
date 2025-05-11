@@ -1,7 +1,7 @@
 import { handleApiError } from './errorHandler';
 
-const BASE_URL = 'https://israel-hatzeira.onrender.com/api';
-
+//const BASE_URL = 'https://israel-hatzeira.onrender.com/api';
+const BASE_URL = 'http://localhost:4455/api';
 class ApiService {
     constructor() {
         this.baseURL = BASE_URL;
