@@ -57,6 +57,7 @@ export default function CreateActivity() {
           activityEndpoints.getCategories(),
           activityEndpoints.getLocations()
         ]);
+        console.log('CATEGORIAS:', categoriesData);
         setCategories(categoriesData);
         setLocations(locationsData);
       } catch (err) {
