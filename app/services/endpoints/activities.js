@@ -12,7 +12,8 @@ export const activityEndpoints = {
 
     async getCategories() {
         try {
-            const response = await apiService.get('/categories');
+            const timestamp = new Date().getTime();
+            const response = await apiService.get(`/categories?_=${timestamp}`);
             return response;
         } catch (error) {
             throw error;

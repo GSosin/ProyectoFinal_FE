@@ -1,43 +1,31 @@
 {
     "id": 1,
-    "title": "Taller de Cocina Israelí",
-    "description": "Aprende a preparar los platos más tradicionales de la cocina israelí. En este taller práctico, aprenderás a hacer hummus, falafel, shakshuka y más. Todos los ingredientes están incluidos y podrás llevarte tus creaciones a casa.",
-    "startDate": "2024-04-15T18:00:00",
-    "endDate": "2024-04-15T21:00:00",
-    "schedule": "Lunes a Viernes de 18:00 a 21:00",
-    "maxCapacity": 20,
+    "title": "Taller de Arte",
+    "description": "Un taller donde aprenderemos diferentes técnicas de pintura y dibujo.",
+    "startDate": "2024-03-15T18:00:00Z",
+    "endDate": "2024-03-15T21:00:00Z",
     "status": "Programada",
-    "categoryId": 1,
-    "locationId": 1,
-    "price": 1500.00,
-    "createdAt": "2024-03-15T10:00:00",
-    "updatedAt": "2024-03-15T10:00:00",
+    "maxCapacity": 20,
     "category": {
         "id": 1,
-        "name": "Gastronomía",
-        "description": "Actividades relacionadas con la cocina y la gastronomía"
+        "name": "Arte y Cultura",
+        "description": "Actividades relacionadas con expresiones artísticas y culturales"
     },
     "location": {
         "id": 1,
-        "name": "Centro Comunitario Hatzeira",
-        "address": "Av. Principal 123",
-        "city": "Montevideo",
-        "capacity": 50
+        "name": "Salón Principal",
+        "address": "Av. Principal 123"
     },
     "ActivityImages": [
         {
             "id": 1,
-            "url": "https://example.com/images/cooking-1.jpg",
-            "path": "activities/cooking-1.jpg",
-            "name": "cooking-1.jpg",
-            "isMain": true
+            "url": "https://example.com/image1.jpg"
         },
         {
             "id": 2,
-            "url": "https://example.com/images/cooking-2.jpg",
-            "path": "activities/cooking-2.jpg",
-            "name": "cooking-2.jpg",
-            "isMain": false
+            "url": "https://example.com/image2.jpg"
         }
-    ]
+    ],
+    "createdAt": "2024-03-01T10:00:00Z",
+    "updatedAt": "2024-03-01T10:00:00Z"
 } 

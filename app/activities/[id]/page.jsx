@@ -166,7 +166,7 @@ const ActivityDetail = () => {
                             <Box className={styles.detailItem}>
                                 <AccessTimeIcon />
                                 <Typography variant="body1">
-                                    Horario: {activity.schedule}
+                                    Estado: {activity.status}
                                 </Typography>
                             </Box>
 

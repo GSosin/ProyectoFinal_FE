@@ -10,13 +10,36 @@ import {
   Paper,
   Container
 } from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { es } from 'date-fns/locale';
 import { activityEndpoints } from '../../services/endpoints/activities';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { apiService } from '../../services/api';
+import dynamic from 'next/dynamic';
+
+// Importaciones completamente dinámicas para evitar SSR
+const NoSSR = ({ children }) => {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  return isClient ? children : null;
+};
+
+// Todos los componentes que causan errores de hidratación se cargan dinámicamente
+const DynamicImageUpload = dynamic(() => import('../../components/ImageUpload'), {
+  ssr: false,
+  loading: () => <Box sx={{ p: 3, border: '1px dashed #ccc', borderRadius: 1 }}>Cargando...</Box>
+});
+
+const DynamicDatePickers = dynamic(() => import('./DynamicDatePickers'), {
+  ssr: false,
+  loading: () => <Box sx={{ p: 3, border: '1px dashed #ccc', borderRadius: 1 }}>Cargando...</Box>
+});
+
+const DynamicEditor = dynamic(() => import('./DynamicEditor'), {
+  ssr: false,
+  loading: () => <Box sx={{ p: 3, border: '1px dashed #ccc', borderRadius: 1 }}>Cargando...</Box>
+});
 
 export default function CreateActivity() {
   // Estados para controlar el formulario
@@ -25,7 +48,6 @@ export default function CreateActivity() {
     categoryId: '',
     startDate: null,
     endDate: null,
-    schedule: '',
     maxCapacity: '',
     locationId: '',
     images: []
@@ -36,60 +58,79 @@ export default function CreateActivity() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  
+  // Clave para forzar reinicio de componentes después de enviar el formulario
+  const [resetKey, setResetKey] = useState(0);
 
-  // Control de renderizado del lado del cliente
+  // Cargar datos solo en el cliente
   useEffect(() => {
-    setIsClient(true);
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      apiService.setToken(user.token);
+      fetchData();
+    }
   }, []);
 
-  // Editor de texto Tiptap
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: '',
-  });
-
-  // Carga de datos iniciales
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [categoriesData, locationsData] = await Promise.all([
-          activityEndpoints.getCategories(),
-          activityEndpoints.getLocations()
-        ]);
-        console.log('CATEGORIAS:', categoriesData);
+  // Función para cargar categorías y ubicaciones
+  const fetchData = async () => {
+    try {
+      const [categoriesData, locationsData] = await Promise.all([
+        activityEndpoints.getCategories(),
+        activityEndpoints.getLocations()
+      ]);
+      
+      if (Array.isArray(categoriesData)) {
         setCategories(categoriesData);
-        setLocations(locationsData);
-      } catch (err) {
-        setError('Error al cargar los datos iniciales');
       }
-    };
-    fetchData();
-  }, []);
+      
+      if (Array.isArray(locationsData)) {
+        setLocations(locationsData);
+      }
+    } catch (err) {
+      setError(err.message || 'Error al cargar los datos iniciales');
+    }
+  };
+
+  // Actualizar fechas
+  const handleDateChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Actualizar descripción
+  const handleEditorChange = (content) => {
+    // Solo guardamos la referencia al HTML, no el editor completo
+    formData.description = content;
+  };
 
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    setSuccess(false);
     
     try {
-      await activityEndpoints.createActivity({
-        ...formData,
-        description: editor ? editor.getHTML() : '',
-      });
+      await activityEndpoints.createActivity(formData);
       setSuccess(true);
+      
       // Resetear formulario
       setFormData({
         title: '',
         categoryId: '',
         startDate: null,
         endDate: null,
-        schedule: '',
         maxCapacity: '',
         locationId: '',
-        images: []
+        images: [],
+        description: ''
       });
-      if (editor) editor.commands.setContent('');
+      
+      // Forzar reinicio de componentes dinámicos
+      setResetKey(prev => prev + 1);
+      
+      // Ocultar mensaje de éxito después de 4 segundos
+      setTimeout(() => setSuccess(false), 4000);
     } catch (err) {
       setError(err.message || 'Error al crear la actividad');
     } finally {
@@ -107,6 +148,12 @@ export default function CreateActivity() {
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
             {error}
+          </Alert>
+        )}
+
+        {success && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            ¡Actividad creada correctamente!
           </Alert>
         )}
 
@@ -130,18 +177,12 @@ export default function CreateActivity() {
             <Typography variant="subtitle1" gutterBottom>
               Descripción
             </Typography>
-            <Box
-              sx={{
-                border: '1px solid #ddd',
-                borderRadius: 1,
-                p: 1,
-                minHeight: 150,
-                mb: 2,
-                background: 'white',
-              }}
-            >
-              {isClient && editor && <EditorContent editor={editor} />}
-            </Box>
+            <NoSSR>
+              <DynamicEditor 
+                key={`editor-${resetKey}`}
+                onChange={handleEditorChange}
+              />
+            </NoSSR>
           </Box>
 
           {/* Fila: Categoría y Ubicación */}
@@ -179,93 +220,53 @@ export default function CreateActivity() {
               <option value=""></option>
               {locations.map((location) => (
                 <option key={location.id} value={location.id}>
-                  {location.name}
+                  {location.address} | {location.name}
                 </option>
               ))}
             </TextField>
           </Box>
 
           {/* Fila: Fechas */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-              <DateTimePicker
-                label="Fecha de inicio *"
-                value={formData.startDate}
-                onChange={(newValue) => setFormData({ ...formData, startDate: newValue })}
-                slotProps={{ 
-                  textField: { 
-                    fullWidth: true, 
-                    required: true,
-                    sx: { flex: 1, minWidth: '200px' }
-                  } 
-                }}
-              />
-            </LocalizationProvider>
-
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-              <DateTimePicker
-                label="Fecha de fin *"
-                value={formData.endDate}
-                onChange={(newValue) => setFormData({ ...formData, endDate: newValue })}
-                slotProps={{ 
-                  textField: { 
-                    fullWidth: true, 
-                    required: true,
-                    sx: { flex: 1, minWidth: '200px' }
-                  } 
-                }}
-              />
-            </LocalizationProvider>
-          </Box>
-
-          {/* Fila: Horario y Capacidad */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <TextField
-              label="Horario *"
-              value={formData.schedule}
-              onChange={(e) => setFormData({ ...formData, schedule: e.target.value })}
-              required
-              sx={{ flex: 1, minWidth: '200px' }}
+          <NoSSR>
+            <DynamicDatePickers 
+              key={`dates-${resetKey}`}
+              startDate={formData.startDate}
+              endDate={formData.endDate}
+              onStartDateChange={(date) => handleDateChange('startDate', date)}
+              onEndDateChange={(date) => handleDateChange('endDate', date)}
             />
+          </NoSSR>
 
+          {/* Fila: Capacidad */}
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
             <TextField
               type="number"
               label="Capacidad máxima *"
               value={formData.maxCapacity}
-              onChange={(e) => setFormData({ ...formData, maxCapacity: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Solo permitir números enteros positivos
+                if (value === '' || (Number.isInteger(Number(value)) && Number(value) > 0)) {
+                  setFormData({ ...formData, maxCapacity: value });
+                }
+              }}
               required
-              sx={{ flex: 1, minWidth: '200px' }}
+              fullWidth
+              inputProps={{
+                min: 1,
+                step: 1
+              }}
             />
           </Box>
 
-          {/* Imágenes */}
-          <Box sx={{ mt: 1 }}>
-            <Button
-              component="label"
-              variant="outlined"
-              sx={{ mr: 1 }}
-            >
-              Subir imágenes
-              <input
-                type="file"
-                hidden
-                multiple
-                accept="image/*"
-                onChange={(e) => {
-                  const files = Array.from(e.target.files);
-                  setFormData(prev => ({
-                    ...prev,
-                    images: [...prev.images, ...files]
-                  }));
-                }}
-              />
-            </Button>
-            {formData.images.length > 0 && (
-              <Typography variant="body2" component="span">
-                {formData.images.length} imagen(es) seleccionada(s)
-              </Typography>
-            )}
-          </Box>
+          <NoSSR>
+            <DynamicImageUpload 
+              key={`upload-${resetKey}`}
+              onImagesUploaded={(images) => {
+                setFormData(prev => ({ ...prev, images }));
+              }}
+            />
+          </NoSSR>
 
           {/* Botón de envío */}
           <Button

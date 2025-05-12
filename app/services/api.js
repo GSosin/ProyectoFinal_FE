@@ -26,28 +26,37 @@ class ApiService {
 
     async request(endpoint, options = {}) {
         try {
+            const headers = this.getHeaders();
             const response = await fetch(`${this.baseURL}${endpoint}`, {
                 ...options,
                 headers: {
-                    ...this.getHeaders(),
+                    ...headers,
                     ...options.headers,
                 },
+                credentials: 'include',
+                mode: 'cors'
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw {
-                    response: {
-                        status: response.status,
-                        data
-                    }
-                };
+                const errorData = await response.json().catch(() => ({}));
+                throw new ApiError(
+                    errorData.message || 'Error en la petición',
+                    response.status,
+                    errorData
+                );
             }
 
+            const data = await response.json();
             return data;
         } catch (error) {
-            throw handleApiError(error);
+            if (error instanceof ApiError) {
+                throw error;
+            }
+            throw new ApiError(
+                'Error de conexión',
+                error.status || -1,
+                error.data || null
+            );
         }
     }
 

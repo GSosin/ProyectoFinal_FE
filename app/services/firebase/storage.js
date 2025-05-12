@@ -4,6 +4,7 @@ import { storage } from '../../config/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 export const uploadImage = async (file, path) => {
+    console.log(storage)
     try {
         const storageRef = ref(storage, path);
         const snapshot = await uploadBytes(storageRef, file);
