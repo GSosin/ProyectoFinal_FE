@@ -1,30 +1,23 @@
-import { apiService } from '../api';
+import {apiService} from '../api';
+import {ApiError, handleApiError} from '../errorHandler';
 
 export const authEndpoints = {
     async login(credentials) {
         try {
-            const response = await apiService.post('/auth/login', credentials);
-            return response;
+            return await apiService.post('/auth/login', credentials);
         } catch (error) {
-            if (error.status === 401) {
-                throw new Error('Email o contraseña incorrectos');
-            }
-            throw error;
+            const handledError = handleApiError(error);
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
         }
     },
 
     async register(userData) {
         try {
-            const response = await apiService.post('/auth/register', userData);
-            return response;
+            return await apiService.post('/auth/register', userData);
         } catch (error) {
-            if (error.status === 409) {
-                throw new Error('El email ya está registrado');
-            }
-            if (error.status === 422) {
-                throw new Error('Datos de registro inválidos');
-            }
-            throw error;
+            const handledError = handleApiError(error);
+            console.log(handledError);
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
         }
     },
 
@@ -33,33 +26,33 @@ export const authEndpoints = {
             await apiService.post('/auth/logout');
             apiService.setToken(null);
         } catch (error) {
-            // Si hay un error en el logout, igual limpiamos el token
             apiService.setToken(null);
-            throw error;
+            const handledError = handleApiError(error);
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
         }
     },
 
     async getCurrentUser() {
         try {
-            const response = await apiService.get('/auth/me');
-            return response;
+            return await apiService.get('/auth/me');
         } catch (error) {
-            if (error.status === 401) {
+            const handledError = handleApiError(error);
+            if (handledError.status === 401) {
                 apiService.setToken(null);
             }
-            throw error;
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
         }
     },
 
     async refreshToken() {
         try {
-            const response = await apiService.post('/auth/refresh-token');
-            return response;
+            return await apiService.post('/auth/refresh-token');
         } catch (error) {
-            if (error.status === 401) {
+            const handledError = handleApiError(error);
+            if (handledError.status === 401) {
                 apiService.setToken(null);
             }
-            throw error;
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
         }
     }
-}; 
+};
