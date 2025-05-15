@@ -142,7 +142,7 @@ export default function CreateActivity() {
     setSuccess(false);
     
     try {
-      await activityEndpoints.createActivity(formData);
+      const activityData = await activityEndpoints.createActivity(formData);
       setSuccess(true);
       
       // Resetear formulario
@@ -162,6 +162,19 @@ export default function CreateActivity() {
       
       // Ocultar mensaje de éxito después de 4 segundos
       setTimeout(() => setSuccess(false), 4000);
+
+      // Guardar imágenes recibidas desde el frontend
+      if (activityData.images && Array.isArray(activityData.images) && activityData.images.length > 0) {
+        await Promise.all(
+          activityData.images.map((img, idx) =>
+            ActivityImage.create({
+              activityId: activityData.id,
+              url: img.url,
+              main: idx === 0, // La primera imagen es main
+            })
+          )
+        );
+      }
     } catch (err) {
       setError(err.message || 'Error al crear la actividad');
     } finally {
