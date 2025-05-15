@@ -22,6 +22,7 @@ import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CircularProgress from '@mui/material/CircularProgress';
 
 // Importaciones completamente dinámicas para evitar SSR
 const NoSSR = ({ children }) => {
@@ -691,6 +692,14 @@ export default function CreateActivity() {
           <Button onClick={() => setDeleteLocationId(null)}>Cancelar</Button>
           <Button onClick={() => handleDeleteLocation(deleteLocationId)} color="error" variant="contained">Eliminar</Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Modal de carga */}
+      <Dialog open={loading} PaperProps={{ sx: { textAlign: 'center', p: 4 } }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
+          <CircularProgress sx={{ mb: 2 }} />
+          <Typography variant="h6">Creando actividad...</Typography>
+        </Box>
       </Dialog>
     </Container>
   );
