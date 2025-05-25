@@ -21,8 +21,10 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import EditIcon from '@mui/icons-material/Edit';
 import styles from './ActivityDetail.module.css';
-import mockActivity from '../../mocks/activity.json';
+import { activityEndpoints } from '../../services/endpoints/activities';
+import { apiService } from '../../services/api';
 
 const ActivityDetail = () => {
     const params = useParams();
@@ -32,22 +34,28 @@ const ActivityDetail = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Simulamos una carga asíncrona
         const loadActivity = async () => {
             try {
-                // Simulamos un delay para mostrar el loading
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                setActivity(mockActivity);
+                // Configurar token si existe
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    apiService.setToken(user.token);
+                }
+
+                const activityData = await activityEndpoints.getActivityById(params.id);
+                setActivity(activityData);
             } catch (err) {
-                setError('Error al cargar la actividad');
-                console.error(err);
+                setError('Error al cargar la actividad: ' + (err.message || 'Error desconocido'));
             } finally {
                 setLoading(false);
             }
         };
 
-        loadActivity();
-    }, []);
+        if (params.id) {
+            loadActivity();
+        }
+    }, [params.id]);
 
     if (loading) {
         return (
@@ -120,14 +128,16 @@ const ActivityDetail = () => {
                         <Typography variant="h6" gutterBottom>
                             Descripción
                         </Typography>
-                        <Typography variant="body1" paragraph>
-                            {activity.description}
-                        </Typography>
+                        <Typography 
+                            variant="body1" 
+                            paragraph
+                            dangerouslySetInnerHTML={{ __html: activity.description }}
+                        />
 
-                        {activity.ActivityImages && activity.ActivityImages.length > 0 && (
+                        {activity.images && activity.images.length > 0 && (
                             <Box sx={{ mb: 3 }}>
                                 <ImageList cols={2} gap={8}>
-                                    {activity.ActivityImages.map((image) => (
+                                    {activity.images.map((image) => (
                                         <ImageListItem key={image.id}>
                                             <img
                                                 src={image.url}
@@ -152,7 +162,10 @@ const ActivityDetail = () => {
                             <Box className={styles.detailItem}>
                                 <LocationOnIcon />
                                 <Typography variant="body1">
-                                    {activity.location.name} - {activity.location.address}, {activity.location.city}
+                                    {activity.Location ? 
+                                        `${activity.Location.name} - ${activity.Location.address}${activity.Location.city ? `, ${activity.Location.city}` : ''}` :
+                                        'Ubicación no especificada'
+                                    }
                                 </Typography>
                             </Box>
 
@@ -173,7 +186,7 @@ const ActivityDetail = () => {
                             <Box className={styles.detailItem}>
                                 <AttachMoneyIcon />
                                 <Typography variant="body1">
-                                    Precio: ${activity.price}
+                                    Precio: {activity.price ? `$${activity.price}` : 'Gratuito'}
                                 </Typography>
                             </Box>
                         </Box>
@@ -189,12 +202,23 @@ const ActivityDetail = () => {
                                     Categoría
                                 </Typography>
                                 <Typography variant="body1">
-                                    {activity.category.name}
+                                    {activity.Category ? activity.Category.name : 'Categoría no especificada'}
                                 </Typography>
                                 <Typography variant="body2" color="textSecondary">
-                                    {activity.category.description}
+                                    {activity.Category ? activity.Category.description : ''}
                                 </Typography>
                             </Box>
+
+                            <Button 
+                                variant="outlined" 
+                                color="secondary" 
+                                fullWidth
+                                startIcon={<EditIcon />}
+                                onClick={() => router.push(`/activities/${params.id}/edit`)}
+                                sx={{ mb: 2 }}
+                            >
+                                Editar Actividad
+                            </Button>
 
                             <Button 
                                 variant="contained" 
