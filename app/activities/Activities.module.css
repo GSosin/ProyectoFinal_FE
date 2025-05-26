@@ -8,10 +8,16 @@
     margin-bottom: 1.5rem;
 }
 
+.menuItems {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
 .card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border-radius: 16px;
     overflow: hidden;
+    flex: auto;
 }
 
 .card:hover {
@@ -23,6 +29,10 @@
     height: 180px;
     background-size: cover;
     background-position: center;
+}
+
+.image {
+    display: contents !important;
 }
 
 .cardContent {
