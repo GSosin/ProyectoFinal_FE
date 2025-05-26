@@ -11,6 +11,9 @@ const WelcomeContent = () => {
 
     const handleStart = () => {
         router.push('/activities/viewAll');
+
+      //  router.push('/activities/create');
+
     };
 
     return (
@@ -40,7 +43,7 @@ const WelcomeContent = () => {
                         onClick={handleStart}
                         className={styles.button}
                     >
-                        Ver Actividades
+                        Crear actividad
                     </Button>
                 </Box>
             </Paper>

@@ -33,6 +33,63 @@ export const activityEndpoints = {
         }
     },
 
+    async getActivityById(id) {
+        try {
+            const response = await apiService.get(`/activities/${id}`);
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async updateActivity(id, activityData) {
+        try {
+            // Crear FormData para enviar datos con imágenes
+            const formData = new FormData();
+            
+            // Agregar todos los campos básicos
+            Object.keys(activityData).forEach(key => {
+                if (key !== 'images' && activityData[key] !== null && activityData[key] !== undefined) {
+                    if (key === 'startDate' || key === 'endDate') {
+                        // Convertir fechas a ISO string
+                        formData.append(key, activityData[key].toISOString());
+                    } else {
+                        formData.append(key, activityData[key]);
+                    }
+                }
+            });
+
+            // Agregar imágenes como JSON string
+            if (activityData.images && Array.isArray(activityData.images)) {
+                formData.append('images', JSON.stringify(activityData.images));
+            }
+
+            // Usar fetch directamente para enviar FormData
+            const token = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null;
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${apiService.baseURL}/activities/${id}`, {
+                method: 'PUT',
+                headers,
+                body: formData,
+                credentials: 'include',
+                mode: 'cors'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Error al actualizar la actividad');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    },
+
     async getCategories() {
         try {
             const timestamp = new Date().getTime();

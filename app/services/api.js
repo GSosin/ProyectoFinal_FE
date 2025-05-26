@@ -1,4 +1,5 @@
 import { handleApiError } from './errorHandler';
+import useAuthStore from '../store/authStore';
 
 //const BASE_URL = 'https://israel-hatzeira.onrender.com/api';
 const BASE_URL = 'http://localhost:4455/api';
@@ -39,6 +40,17 @@ class ApiService {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
+                
+                // Handle 403 Forbidden response
+                if (response.status === 403) {
+                    // Clear token and trigger logout
+                    this.setToken(null);
+                    const authStore = useAuthStore.getState();
+                    authStore.logout();
+                    // Redirect to login page
+                    window.location.href = '/login';
+                }
+
                 throw new ApiError(
                     errorData.message || 'Error en la petición',
                     response.status,
