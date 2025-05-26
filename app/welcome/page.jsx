@@ -10,7 +10,7 @@ const WelcomeContent = () => {
     const router = useRouter();
 
     const handleStart = () => {
-        router.push('/activities');
+        router.push('/activities/create');
     };
 
     return (
@@ -40,7 +40,7 @@ const WelcomeContent = () => {
                         onClick={handleStart}
                         className={styles.button}
                     >
-                        Ver Actividades
+                        Crear actividad
                     </Button>
                 </Box>
             </Paper>

@@ -18,11 +18,12 @@ import {
 import { activityEndpoints } from '../../services/endpoints/activities';
 import { apiService } from '../../services/api';
 import dynamic from 'next/dynamic';
-import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CircularProgress from '@mui/material/CircularProgress';
+import 'suneditor/dist/css/suneditor.min.css';
+import { useRouter } from 'next/navigation';
 
 // Importaciones completamente dinámicas para evitar SSR
 const NoSSR = ({ children }) => {
@@ -46,10 +47,9 @@ const DynamicDatePickers = dynamic(() => import('./DynamicDatePickers'), {
   loading: () => <Box sx={{ p: 3, border: '1px dashed #ccc', borderRadius: 1 }}>Cargando...</Box>
 });
 
-const DynamicEditor = dynamic(() => import('./DynamicEditor'), {
-  ssr: false,
-  loading: () => <Box sx={{ p: 3, border: '1px dashed #ccc', borderRadius: 1 }}>Cargando...</Box>
-});
+const  SunEditor  =  dynamic ( ( )  =>  import ( "suneditor-react" ) ,  { 
+  ssr : false , 
+} ) ;
 
 export default function CreateActivity() {
   // Estados para controlar el formulario
@@ -68,6 +68,7 @@ export default function CreateActivity() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
   
   // Clave para forzar reinicio de componentes después de enviar el formulario
   const [resetKey, setResetKey] = useState(0);
@@ -131,11 +132,10 @@ export default function CreateActivity() {
 
   // Actualizar descripción
   const handleEditorChange = (content) => {
-    // Solo guardamos la referencia al HTML, no el editor completo
-    formData.description = content;
+    console.log(content);
+    setFormData(prev => ({ ...prev, description: content }));
   };
 
-  // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -146,7 +146,6 @@ export default function CreateActivity() {
       const activityData = await activityEndpoints.createActivity(formData);
       setSuccess(true);
       
-      // Resetear formulario
       setFormData({
         title: '',
         categoryId: '',
@@ -158,24 +157,7 @@ export default function CreateActivity() {
         description: ''
       });
       
-      // Forzar reinicio de componentes dinámicos
-      setResetKey(prev => prev + 1);
-      
-      // Ocultar mensaje de éxito después de 4 segundos
-      setTimeout(() => setSuccess(false), 4000);
-
-      // Guardar imágenes recibidas desde el frontend
-      if (activityData.images && Array.isArray(activityData.images) && activityData.images.length > 0) {
-        await Promise.all(
-          activityData.images.map((img, idx) =>
-            ActivityImage.create({
-              activityId: activityData.id,
-              url: img.url,
-              main: idx === 0, // La primera imagen es main
-            })
-          )
-        );
-      }
+      router.push(`/activities/${activityData.id}`);
     } catch (err) {
       setError(err.message || 'Error al crear la actividad');
     } finally {
@@ -306,12 +288,16 @@ export default function CreateActivity() {
             <Typography variant="subtitle1" gutterBottom>
               Descripción
             </Typography>
-            <NoSSR>
-              <DynamicEditor 
-                key={`editor-${resetKey}`}
-                onChange={handleEditorChange}
-              />
-            </NoSSR>
+            <SunEditor
+              onChange={(content) => handleEditorChange(content)}
+              setContents={formData.description}
+              setOptions={{
+                height: 320,
+                buttonList: [
+                  ['bold', 'underline', 'italic', 'strike', 'list', 'align', 'fontSize', 'formatBlock', 'table', 'image']
+                ]
+              }}
+            />
           </Box>
 
           {/* Fila: Categoría y Ubicación */}

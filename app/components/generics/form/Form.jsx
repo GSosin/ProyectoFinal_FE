@@ -104,7 +104,6 @@ const Form = ({
             value: formData[field.name],
             onChange: handleChange,
             error: !!error,
-            helperText: error,
             fullWidth: true,
             required: field.required,
             ...field.props
@@ -149,6 +148,7 @@ const Form = ({
                 return (
                     <TextField
                         {...commonProps}
+                        helperText={error}
                         type={field.type || 'text'}
                         label={field.label}
                     />
