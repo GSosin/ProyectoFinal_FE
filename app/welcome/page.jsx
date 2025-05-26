@@ -10,7 +10,10 @@ const WelcomeContent = () => {
     const router = useRouter();
 
     const handleStart = () => {
-        router.push('/activities/create');
+        router.push('/activities/viewAll');
+
+      //  router.push('/activities/create');
+
     };
 
     return (
