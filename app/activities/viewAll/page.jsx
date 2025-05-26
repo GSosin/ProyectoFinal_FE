@@ -30,7 +30,6 @@ import styles from './ActivityDetail.module.css';
 import { activityEndpoints } from '../../services/endpoints/activities';
 
 const ActivitiesDetail = () => {
-    const params = useParams();
     const router = useRouter();
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -145,7 +144,7 @@ const ActivitiesDetail = () => {
                 Todas las Actividades
             </Typography>
 
-            {activities.map((activity) => (
+            {activities.data.map((activity) => (
                 <Paper
                     key={activity.id}
                     elevation={3}
