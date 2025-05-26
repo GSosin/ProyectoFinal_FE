@@ -1,6 +1,29 @@
 import { apiService } from '../api';
 
 export const activityEndpoints = {
+
+
+    async getAllActivities() {
+        try {
+            const response = await apiService.get('/activities');
+            return response;
+        } catch (error) {
+            console.error('Error al obtener actividades:', error);
+            throw new Error(error || 'Error desconocido al obtener actividades');        }
+    },
+
+    async deleteActivity(id){
+        try {
+            const response = await apiService.delete(`/activities/${id}`);
+            return response;
+        } catch (error) {
+            console.error('Error al eliminar la actividad:', error);
+            throw new Error(
+                error?.message || 'Error desconocido al eliminar la actividad'
+            );
+        }
+    },
+
     async createActivity(activityData) {
         try {
             const response = await apiService.post('/activities', activityData);

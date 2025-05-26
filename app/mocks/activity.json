@@ -1,4 +1,4 @@
-{
+[{
     "id": 1,
     "title": "Taller de Arte",
     "description": "Un taller donde aprenderemos diferentes técnicas de pintura y dibujo.",
@@ -28,4 +28,99 @@
     ],
     "createdAt": "2024-03-01T10:00:00Z",
     "updatedAt": "2024-03-01T10:00:00Z"
-} 
+},
+{
+"id": 1,
+    "title": "Taller de Arte",
+"description": "Un taller donde aprenderemos diferentes técnicas de pintura y dibujo.",
+"startDate": "2024-03-15T18:00:00Z",
+"endDate": "2024-03-15T21:00:00Z",
+"status": "Programada",
+    "maxCapacity": 20,
+    "category": {
+"id": 1,
+"name": "Arte y Cultura",
+"description": "Actividades relacionadas con expresiones artísticas y culturales"
+},
+"location": {
+"id": 1,
+"name": "Salón Principal",
+"address": "Av. Principal 123"
+},
+"ActivityImages": [
+{
+"id": 1,
+"url": "https://example.com/image1.jpg"
+},
+{
+"id": 2,
+"url": "https://example.com/image2.jpg"
+}
+],
+"createdAt": "2024-03-01T10:00:00Z",
+"updatedAt": "2024-03-01T10:00:00Z"
+},
+    {
+        "id": 1,
+        "title": "Taller de Arte",
+        "description": "Un taller donde aprenderemos diferentes técnicas de pintura y dibujo.",
+        "startDate": "2024-03-15T18:00:00Z",
+        "endDate": "2024-03-15T21:00:00Z",
+        "status": "Programada",
+        "maxCapacity": 20,
+        "category": {
+            "id": 1,
+            "name": "Arte y Cultura",
+            "description": "Actividades relacionadas con expresiones artísticas y culturales"
+        },
+        "location": {
+            "id": 1,
+            "name": "Salón Principal",
+            "address": "Av. Principal 123"
+        },
+        "ActivityImages": [
+            {
+                "id": 1,
+                "url": "https://example.com/image1.jpg"
+            },
+            {
+                "id": 2,
+                "url": "https://example.com/image2.jpg"
+            }
+        ],
+        "createdAt": "2024-03-01T10:00:00Z",
+        "updatedAt": "2024-03-01T10:00:00Z"
+    },
+    {
+        "id": 1,
+        "title": "Taller de Arte",
+        "description": "Un taller donde aprenderemos diferentes técnicas de pintura y dibujo.",
+        "startDate": "2024-03-15T18:00:00Z",
+        "endDate": "2024-03-15T21:00:00Z",
+        "status": "Programada",
+        "maxCapacity": 20,
+        "category": {
+            "id": 1,
+            "name": "Arte y Cultura",
+            "description": "Actividades relacionadas con expresiones artísticas y culturales"
+        },
+        "location": {
+            "id": 1,
+            "name": "Salón Principal",
+            "address": "Av. Principal 123"
+        },
+        "ActivityImages": [
+            {
+                "id": 1,
+                "url": "https://example.com/image1.jpg"
+            },
+            {
+                "id": 2,
+                "url": "https://example.com/image2.jpg"
+            }
+        ],
+        "createdAt": "2024-03-01T10:00:00Z",
+        "updatedAt": "2024-03-01T10:00:00Z"
+    }
+
+]
