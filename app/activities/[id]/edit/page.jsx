@@ -22,6 +22,7 @@ import { apiService } from '../../../services/api';
 import dynamic from 'next/dynamic';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CustomAlert from '../../../components/generics/Alert/CustomAlert';
 
 // Importaciones completamente dinámicas para evitar SSR
 const NoSSR = ({ children }) => {
@@ -222,11 +223,11 @@ export default function EditActivity() {
           Editar Actividad
         </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+        <CustomAlert 
+            message={error}
+            onClose={() => setError(null)}
+            open={!!error}
+        />
 
         {success && (
           <Alert severity="success" sx={{ mb: 3 }}>
@@ -412,11 +413,11 @@ export default function EditActivity() {
       <Dialog open={openCategoryDialog} onClose={() => setOpenCategoryDialog(false)}>
         <DialogTitle>Crear Nueva Categoría</DialogTitle>
         <DialogContent>
-          {categoryError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {categoryError}
-            </Alert>
-          )}
+          <CustomAlert 
+              message={categoryError}
+              onClose={() => setCategoryError(null)}
+              open={!!categoryError}
+          />
           <TextField
             autoFocus
             margin="dense"
@@ -448,11 +449,11 @@ export default function EditActivity() {
       <Dialog open={openLocationDialog} onClose={() => setOpenLocationDialog(false)}>
         <DialogTitle>Crear Nueva Ubicación</DialogTitle>
         <DialogContent>
-          {locationError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {locationError}
-            </Alert>
-          )}
+          <CustomAlert 
+              message={locationError}
+              onClose={() => setLocationError(null)}
+              open={!!locationError}
+          />
           <TextField
             autoFocus
             margin="dense"

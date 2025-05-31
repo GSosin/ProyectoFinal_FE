@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { Typography, Box, Container, Paper, Button } from '@mui/material';
 import CelebrationIcon from '@mui/icons-material/Celebration';
-import ProtectedRoute from '../components/ProtectedRoute';
+import ProtectedRoute from '../components/generics/ProtectedRoute';
 import styles from './Welcome.module.css';
 
 const WelcomeContent = () => {

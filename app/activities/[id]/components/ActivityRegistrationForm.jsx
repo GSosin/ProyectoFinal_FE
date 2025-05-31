@@ -9,29 +9,32 @@ import {
     DialogContent, 
     DialogActions, 
     Button,
-    Alert,
     CircularProgress,
     TextField
 } from '@mui/material';
 import { apiService } from '../../../services/api';
 import { useRouter } from 'next/navigation';
+import useAuthStore from '../../../store/authStore';
+import CustomAlert from '../../../components/generics/Alert/CustomAlert';
 
 const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [user, setUser] = useState(null);
     const [comments, setComments] = useState('');
+    const { isLoggedIn, user, checkAuth } = useAuthStore();
 
-    // Verificar si el usuario está autenticado al abrir el diálogo
-    const checkAuth = async () => {
-        try {
-            const response = await apiService.get('/auth/me');
-            setUser(response);
-        } catch (error) {
-            setUser(null);
+    useEffect(() => {
+        if (open) {
+            checkAuth();
+            // Obtener el token del localStorage y establecerlo en el apiService
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const { token } = JSON.parse(storedUser);
+                apiService.setToken(token);
+            }
         }
-    };
+    }, [open, checkAuth]);
 
     const handleActivityRegistration = async () => {
         setLoading(true);
@@ -41,7 +44,7 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
             onSuccess?.();
             onClose();
         } catch (error) {
-            setError(error.response?.data?.message || 'Error al inscribirse en la actividad');
+            setError(error.message || 'Error al inscribirse en la actividad');
         } finally {
             setLoading(false);
         }
@@ -52,14 +55,7 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
         router.push('/register');
     };
 
-    // Verificar autenticación cuando se abre el diálogo
-    useEffect(() => {
-        if (open) {
-            checkAuth();
-        }
-    }, [open]);
-
-    if (!user) {
+    if (!isLoggedIn) {
         return (
             <Dialog 
                 open={open} 
@@ -124,7 +120,7 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
             <DialogContent>
                 <Box sx={{ mt: 2, textAlign: 'center' }}>
                     <Typography variant="body1" sx={{ mb: 3 }}>
-                        ¿{user.name}, deseas confirmar tu asistencia a la actividad "{activity.title}"?
+                        ¿{user.firstName} {user.lastName}, deseas confirmar tu asistencia a la actividad "{activity.title}"?
                     </Typography>
                     
                     <TextField
@@ -143,11 +139,12 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
                         }}
                     />
 
-                    {error && (
-                        <Alert severity="error" sx={{ mb: 2 }}>
-                            {error}
-                        </Alert>
-                    )}
+                    <CustomAlert 
+                        message={error}
+                        onClose={() => setError(null)}
+                        open={!!error}
+                    />
+
                     <Button
                         variant="contained"
                         color="primary"

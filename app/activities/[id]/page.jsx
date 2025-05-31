@@ -26,6 +26,7 @@ import styles from './ActivityDetail.module.css';
 import { apiService } from '../../services/api';
 import parse from 'html-react-parser';
 import ActivityRegistrationForm from './components/ActivityRegistrationForm';
+import CustomAlert from '../../components/generics/Alert/CustomAlert';
 
 const ActivityDetail = () => {
     const params = useParams();
@@ -34,7 +35,7 @@ const ActivityDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [registrationDialogOpen, setRegistrationDialogOpen] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success', vertical: 'top', horizontal: 'center' });
 
     useEffect(() => {
         const loadActivity = async () => {
@@ -672,6 +673,7 @@ const ActivityDetail = () => {
                 open={registrationDialogOpen}
                 onClose={() => setRegistrationDialogOpen(false)}
                 onSuccess={() => {
+                    setError(null);
                     setSnackbar({
                         open: true,
                         message: '¡Inscripción exitosa! Te enviaremos un correo con los detalles.',
@@ -680,20 +682,12 @@ const ActivityDetail = () => {
                 }}
             />
 
-            <Snackbar
+            <CustomAlert 
+                message={snackbar.message}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
                 open={snackbar.open}
-                autoHideDuration={6000}
-                onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-            >
-                <Alert 
-                    onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
-                    severity={snackbar.severity}
-                    sx={{ width: '100%' }}
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
+                severity={snackbar.severity}
+            />
         </Container>
     );
 };

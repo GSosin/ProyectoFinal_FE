@@ -23,6 +23,7 @@ import EventIcon from '@mui/icons-material/Event';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import MailIcon from '@mui/icons-material/Mail';
 import HistoryIcon from '@mui/icons-material/History';
+import { useRouter } from 'next/navigation';
 
 // Paleta de colores consistente
 const theme = {
@@ -1174,34 +1175,43 @@ function Footer() {
 
 export default function Home() {
   const { isLoggedIn, checkAuth } = useAuthStore();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const isMobile = useMediaQuery('(max-width:600px)');
-  const isTablet = useMediaQuery('(max-width:960px)');
 
   useEffect(() => {
     checkAuth();
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      if (isLoggedIn) {
+        router.push('/welcome');
+      } else {
+        router.push('/login');
+      }
+    }
+  }, [isLoggedIn, loading, router]);
+
   if (loading) {
     return null;
   }
 
-  return (
-    <Box sx={{ minHeight: '100vh', bgcolor: theme.background.default }}>
-      {/* Header mejorado */}
-      <Header menuItems={menuItems} />
-
-      {/* Carrusel principal */}
-      <Carousel images={carouselImages} />
-
-      {/* Secciones dinámicas */}
-      {pageSections.map((section) => (
-        <SectionRenderer key={section.id} section={section} />
-      ))}
-
-      {/* Footer */}
-      <Footer />
-    </Box>
-  );
+  return null;
 } 
+
+//<Box sx={{ minHeight: '100vh', bgcolor: theme.background.default }}>
+//{/* Header mejorado */}
+//<Header menuItems={menuItems} />
+
+//{/* Carrusel principal */}
+//<Carousel images={carouselImages} />
+
+//{/* Secciones dinámicas */}
+//{pageSections.map((section) => (
+ // <SectionRenderer key={section.id} section={section} />
+//))}
+
+//{/* Footer */}
+//<Footer />
+//</Box>

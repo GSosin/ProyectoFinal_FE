@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Alert, Button, FormHelperText } from '@mui/material';
+import { TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Button, FormHelperText } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import CustomAlert from '../Alert/CustomAlert';
 
 const Form = ({ 
     fields, 
@@ -158,11 +159,11 @@ const Form = ({
 
     return (
         <form onSubmit={handleSubmit}>
-            {errors.form && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                    {errors.form}
-                </Alert>
-            )}
+            <CustomAlert 
+                message={errors.form}
+                onClose={() => setErrors(prev => ({ ...prev, form: null }))}
+                open={!!errors.form}
+            />
             
             {fields.map((field, index) => (
                 <div key={index} style={{ marginBottom: '1rem' }}>

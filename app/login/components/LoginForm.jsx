@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, Button, Typography, Alert } from '@mui/material';
+import { Card, Button, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import Form from '../../components/generics/form/Form';
 import { authEndpoints } from '../../services/endpoints/auth';
 import useAuthStore from '../../store/authStore';
+import CustomAlert from '../../components/generics/Alert/CustomAlert';
 import styles from '../Login.module.css';
 
 const LoginForm = () => {
@@ -64,11 +65,11 @@ const LoginForm = () => {
     return (
         <div className={styles.container}>
             <Card className={styles.card}>
-                {error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {error}
-                    </Alert>
-                )}
+                <CustomAlert 
+                    message={error}
+                    onClose={() => setError(null)}
+                    open={!!error}
+                />
                 <Form
                     fields={fields}
                     onSubmit={handleSubmit}
