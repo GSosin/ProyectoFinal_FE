@@ -1,9 +1,6 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import Login from './login/page';
-import Welcome from './welcome/page';
-import useAuthStore from './store/authStore';
 import { Box, Typography, AppBar, Toolbar, Container, Paper, TextField, Button, Grid, Card, CardMedia, CardContent, Divider, List, ListItem, ListItemIcon, ListItemText, Accordion, AccordionSummary, AccordionDetails, useMediaQuery, Modal, IconButton } from '@mui/material';
 import Image from 'next/image';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -23,6 +20,8 @@ import EventIcon from '@mui/icons-material/Event';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import MailIcon from '@mui/icons-material/Mail';
 import HistoryIcon from '@mui/icons-material/History';
+import { useRouter } from 'next/navigation';
+import useAuthStore from './store/authStore';
 
 // Paleta de colores consistente
 const theme = {
@@ -998,6 +997,27 @@ function SectionRenderer({ section }) {
 // Componente de Header mejorado
 function Header({ menuItems, logo }) {
   const isMobile = useMediaQuery('(max-width:600px)');
+  const router = useRouter();
+  const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+  const user = useAuthStore((state) => state.user);
+
+  console.log(user)
+  const handleMenuClick = (item) => {
+    const element = document.getElementById(item.id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleLoginClick = () => {
+    router.push('/login');
+  };
+
+  const handleLogout = async () => {
+    const authStore = useAuthStore.getState();
+    await authStore.logout();
+    router.push('/login');
+  };
   
   return (
     <AppBar 
@@ -1007,7 +1027,8 @@ function Header({ menuItems, logo }) {
         bgcolor: theme.background.default, 
         color: theme.primary.main, 
         boxShadow: '0 2px 10px rgba(0,0,0,0.06)', 
-        borderBottom: `1px solid ${theme.primary.main}10` 
+        borderBottom: `1px solid ${theme.primary.main}10`,
+        position: 'fixed',
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, sm: 4 } }}>
@@ -1064,32 +1085,90 @@ function Header({ menuItems, logo }) {
           </Typography>
         </Box>
         
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
-          {menuItems.map((item, i) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2 }}>
+            {menuItems.map((item, i) => (
+              <Button
+                key={i}
+                color="inherit"
+                onClick={() => handleMenuClick(item)}
+                sx={{ 
+                  fontWeight: item.active ? 600 : 400, 
+                  color: item.active ? theme.primary.main : theme.text.secondary,
+                  borderBottom: item.active ? `2px solid ${theme.primary.main}` : 'none',
+                  borderRadius: '4px 4px 0 0',
+                  px: 2,
+                  py: 1,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    color: theme.primary.main,
+                    backgroundColor: `${theme.primary.main}08`,
+                    borderBottom: `2px solid ${theme.primary.main}40`
+                  }
+                }}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </Box>
+          
+          {isLoggedIn ? (
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              bgcolor: `${theme.primary.main}10`,
+              borderRadius: 2,
+              px: 2,
+              py: 1
+            }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: theme.primary.main,
+                  fontWeight: 500
+                }}
+              >
+                ¡Hola, {user?.firstName + ' ' + user?.lastName || 'Usuario'}!
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleLogout}
+                sx={{
+                  ml: 1,
+                  borderColor: theme.primary.main,
+                  color: theme.primary.main,
+                  '&:hover': {
+                    borderColor: theme.primary.dark,
+                    backgroundColor: `${theme.primary.main}10`
+                  }
+                }}
+              >
+                Salir
+              </Button>
+            </Box>
+          ) : (
             <Button
-              key={i}
-              color="inherit"
-              href={`#${item.id}`}
-              sx={{ 
-                fontWeight: item.active ? 600 : 400, 
-                color: item.active ? theme.primary.main : theme.text.secondary,
-                borderBottom: item.active ? `2px solid ${theme.primary.main}` : 'none',
-                borderRadius: '4px 4px 0 0',
-                px: 2,
+              variant="contained"
+              onClick={handleLoginClick}
+              sx={{
+                bgcolor: theme.primary.main,
+                color: 'white',
+                px: 3,
                 py: 1,
                 textTransform: 'none',
-                fontSize: '1rem',
-                transition: 'all 0.2s',
+                fontWeight: 500,
                 '&:hover': {
-                  color: theme.primary.main,
-                  backgroundColor: `${theme.primary.main}08`,
-                  borderBottom: `2px solid ${theme.primary.main}40`
+                  bgcolor: theme.primary.dark
                 }
               }}
             >
-              {item.label}
+              Iniciar sesión
             </Button>
-          ))}
+          )}
         </Box>
       </Toolbar>
     </AppBar>
@@ -1173,35 +1252,18 @@ function Footer() {
 }
 
 export default function Home() {
-  const { isLoggedIn, checkAuth } = useAuthStore();
-  const [loading, setLoading] = useState(true);
-  const isMobile = useMediaQuery('(max-width:600px)');
-  const isTablet = useMediaQuery('(max-width:960px)');
-
-  useEffect(() => {
-    checkAuth();
-    setLoading(false);
-  }, []);
-
-  if (loading) {
-    return null;
-  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.background.default }}>
-      {/* Header mejorado */}
       <Header menuItems={menuItems} />
 
-      {/* Carrusel principal */}
       <Carousel images={carouselImages} />
 
-      {/* Secciones dinámicas */}
       {pageSections.map((section) => (
         <SectionRenderer key={section.id} section={section} />
       ))}
 
-      {/* Footer */}
       <Footer />
     </Box>
-  );
+  )
 } 

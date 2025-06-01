@@ -4,22 +4,57 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '../store/authStore';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, requiredRole, requiredPermissions = [] }) => {
     const router = useRouter();
-    const { isLoggedIn, checkAuth } = useAuthStore();
+    const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
+    const user = useAuthStore((state) => state.user);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
+
 
     useEffect(() => {
-        checkAuth();
-        if (!isLoggedIn) {
-            // Guardamos la ruta actual para redirigir después del login
-            const currentPath = window.location.pathname;
-            localStorage.setItem('redirectPath', currentPath);
-            router.push('/');
+        if (!isHydrated) {
+            return; 
         }
-    }, [isLoggedIn]);
+
+        if (!isLoggedIn) {
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('redirectPath', window.location.pathname);
+            }
+            router.replace('/login');
+            return;
+        }
+
+        if (requiredRole && user?.role?.name !== requiredRole) {
+            router.replace('/unauthorized');
+            return;
+        }
+
+        if (
+            requiredPermissions.length > 0 &&
+            !requiredPermissions.some(permission => user?.permissions?.includes(permission))
+        ) {
+            router.replace('/unauthorized');
+        }
+    }, [isHydrated, isLoggedIn, user, requiredRole, requiredPermissions, router]);
+
+
+    if (!isHydrated) {
+        return <div>Verificando sesión...</div>;
+    }
 
     if (!isLoggedIn) {
-        return null; // o un loading spinner
+        return null;
+    }
+
+    if (requiredRole && user?.role?.name !== requiredRole) {
+        return null;
+    }
+
+    if (
+        requiredPermissions.length > 0 &&
+        !requiredPermissions.some(permission => user?.permissions?.includes(permission))
+    ) {
+        return null;
     }
 
     return children;
