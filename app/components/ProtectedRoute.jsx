@@ -1,6 +1,4 @@
-'use client';
-
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuthStore from '../store/authStore';
 
@@ -13,7 +11,7 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermissions = [] }) =>
 
     useEffect(() => {
         if (!isHydrated) {
-            return; 
+            return;
         }
 
         if (!isLoggedIn) {

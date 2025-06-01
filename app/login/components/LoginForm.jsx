@@ -57,6 +57,8 @@ const LoginForm = () => {
             // Usamos el store para manejar el login
             login(response.user, response.token);
 
+            localStorage.setItem('token', response.token);
+
             // Obtenemos la ruta de redirección guardada
             const redirectPath = localStorage.getItem('redirectPath') || '/';
             localStorage.removeItem('redirectPath'); // Limpiamos la ruta guardada

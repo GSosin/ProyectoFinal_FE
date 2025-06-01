@@ -22,6 +22,8 @@ import { apiService } from '../../../services/api';
 import dynamic from 'next/dynamic';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ProtectedRoute from '../../../components/ProtectedRoute';
+import useAuthStore from '../store/authStore';
 
 // Importaciones completamente dinámicas para evitar SSR
 const NoSSR = ({ children }) => {
@@ -84,6 +86,8 @@ export default function EditActivity() {
   const [openLocationDialog, setOpenLocationDialog] = useState(false);
   const [newLocation, setNewLocation] = useState({ name: '', address: '' });
   const [locationError, setLocationError] = useState(null);
+
+  const { isLoggedIn, checkAuth } = useAuthStore();
 
   // Cargar datos solo en el cliente
   useEffect(() => {
@@ -208,275 +212,277 @@ export default function EditActivity() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Button 
-        startIcon={<ArrowBackIcon />}
-        onClick={() => router.back()}
-        sx={{ mb: 2 }}
-      >
-        Volver
-      </Button>
+    <ProtectedRoute>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Button 
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.back()}
+          sx={{ mb: 2 }}
+        >
+          Volver
+        </Button>
 
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Editar Actividad
-        </Typography>
+        <Paper elevation={3} sx={{ p: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Editar Actividad
+          </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
 
-        {success && (
-          <Alert severity="success" sx={{ mb: 3 }}>
-            ¡Actividad actualizada correctamente! Redirigiendo...
-          </Alert>
-        )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              ¡Actividad actualizada correctamente! Redirigiendo...
+            </Alert>
+          )}
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-          {/* Título */}
-          <TextField
-            fullWidth
-            label="Título de la actividad"
-            value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            required
-            sx={{ mb: 3 }}
-          />
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+            {/* Título */}
+            <TextField
+              fullWidth
+              label="Título de la actividad"
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              required
+              sx={{ mb: 3 }}
+            />
 
-          {/* Editor de descripción */}
-          <Box sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              Descripción
-            </Typography>
-            <NoSSR>
-              <DynamicEditor 
-                key={`editor-${resetKey}`}
-                initialContent={formData.description}
-                onChange={handleEditorChange}
-              />
-            </NoSSR>
+            {/* Editor de descripción */}
+            <Box sx={{ mt: 4, mb: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Descripción
+              </Typography>
+              <NoSSR>
+                <DynamicEditor 
+                  key={`editor-${resetKey}`}
+                  initialContent={formData.description}
+                  onChange={handleEditorChange}
+                />
+              </NoSSR>
+            </Box>
+
+            {/* Categoría */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 3, mb: 3 }}>
+              <TextField
+                select
+                fullWidth
+                label="Categoría"
+                value={formData.categoryId}
+                onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
+                required
+                SelectProps={{
+                  native: true,
+                }}
+              >
+                <option value="">Selecciona una categoría</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </TextField>
+              <IconButton 
+                color="primary" 
+                onClick={() => setOpenCategoryDialog(true)}
+                title="Agregar nueva categoría"
+                sx={{ minWidth: 48, height: 48 }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
+
+            {/* Fechas */}
+            <Box sx={{ mt: 4, mb: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Fechas
+              </Typography>
+              <NoSSR>
+                <DynamicDatePickers 
+                  key={`dates-${resetKey}`}
+                  startDate={formData.startDate}
+                  endDate={formData.endDate}
+                  onStartDateChange={(date) => handleDateChange('startDate', date)}
+                  onEndDateChange={(date) => handleDateChange('endDate', date)}
+                />
+              </NoSSR>
+            </Box>
+
+            {/* Capacidad máxima */}
+            <TextField
+              fullWidth
+              type="number"
+              label="Capacidad máxima"
+              value={formData.maxCapacity}
+              onChange={(e) => setFormData(prev => ({ ...prev, maxCapacity: parseInt(e.target.value) || '' }))}
+              required
+              inputProps={{ min: 1 }}
+              sx={{ mt: 3, mb: 3 }}
+            />
+
+            {/* Ubicación */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 3 }}>
+              <TextField
+                select
+                fullWidth
+                label="Ubicación"
+                value={formData.locationId}
+                onChange={(e) => setFormData(prev => ({ ...prev, locationId: e.target.value }))}
+                required
+                SelectProps={{
+                  native: true,
+                }}
+              >
+                <option value="">Selecciona una ubicación</option>
+                {locations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.name} - {location.address}
+                  </option>
+                ))}
+              </TextField>
+              <IconButton 
+                color="primary" 
+                onClick={() => setOpenLocationDialog(true)}
+                title="Agregar nueva ubicación"
+                sx={{ minWidth: 48, height: 48 }}
+              >
+                <AddIcon />
+              </IconButton>
+            </Box>
+
+            {/* Subida de imágenes */}
+            <Box sx={{ mt: 4, mb: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Imágenes
+              </Typography>
+              <NoSSR>
+                <DynamicActivityImageEditor 
+                  key={`images-${resetKey}`}
+                  images={formData.images}
+                  onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+                />
+              </NoSSR>
+            </Box>
+
+            {/* Botones */}
+            <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={loading}
+                sx={{ minWidth: 200 }}
+              >
+                {loading ? 'Actualizando...' : 'Actualizar Actividad'}
+              </Button>
+              
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={() => router.back()}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+            </Box>
           </Box>
 
-          {/* Categoría */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 3, mb: 3 }}>
-            <TextField
-              select
-              fullWidth
-              label="Categoría"
-              value={formData.categoryId}
-              onChange={(e) => setFormData(prev => ({ ...prev, categoryId: e.target.value }))}
-              required
-              SelectProps={{
-                native: true,
+          {/* Loading overlay */}
+          {loading && (
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 9999,
               }}
             >
-              <option value="">Selecciona una categoría</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </TextField>
-            <IconButton 
-              color="primary" 
-              onClick={() => setOpenCategoryDialog(true)}
-              title="Agregar nueva categoría"
-              sx={{ minWidth: 48, height: 48 }}
-            >
-              <AddIcon />
-            </IconButton>
-          </Box>
+              <Paper sx={{ p: 4, textAlign: 'center' }}>
+                <CircularProgress sx={{ mb: 2 }} />
+                <Typography variant="h6">Actualizando actividad...</Typography>
+              </Paper>
+            </Box>
+          )}
+        </Paper>
 
-          {/* Fechas */}
-          <Box sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              Fechas
-            </Typography>
-            <NoSSR>
-              <DynamicDatePickers 
-                key={`dates-${resetKey}`}
-                startDate={formData.startDate}
-                endDate={formData.endDate}
-                onStartDateChange={(date) => handleDateChange('startDate', date)}
-                onEndDateChange={(date) => handleDateChange('endDate', date)}
-              />
-            </NoSSR>
-          </Box>
-
-          {/* Capacidad máxima */}
-          <TextField
-            fullWidth
-            type="number"
-            label="Capacidad máxima"
-            value={formData.maxCapacity}
-            onChange={(e) => setFormData(prev => ({ ...prev, maxCapacity: parseInt(e.target.value) || '' }))}
-            required
-            inputProps={{ min: 1 }}
-            sx={{ mt: 3, mb: 3 }}
-          />
-
-          {/* Ubicación */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 3 }}>
+        {/* Diálogos para crear categoría */}
+        <Dialog open={openCategoryDialog} onClose={() => setOpenCategoryDialog(false)}>
+          <DialogTitle>Crear Nueva Categoría</DialogTitle>
+          <DialogContent>
+            {categoryError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {categoryError}
+              </Alert>
+            )}
             <TextField
-              select
+              autoFocus
+              margin="dense"
+              label="Nombre"
               fullWidth
-              label="Ubicación"
-              value={formData.locationId}
-              onChange={(e) => setFormData(prev => ({ ...prev, locationId: e.target.value }))}
-              required
-              SelectProps={{
-                native: true,
-              }}
-            >
-              <option value="">Selecciona una ubicación</option>
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name} - {location.address}
-                </option>
-              ))}
-            </TextField>
-            <IconButton 
-              color="primary" 
-              onClick={() => setOpenLocationDialog(true)}
-              title="Agregar nueva ubicación"
-              sx={{ minWidth: 48, height: 48 }}
-            >
-              <AddIcon />
-            </IconButton>
-          </Box>
-
-          {/* Subida de imágenes */}
-          <Box sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              Imágenes
-            </Typography>
-            <NoSSR>
-              <DynamicActivityImageEditor 
-                key={`images-${resetKey}`}
-                images={formData.images}
-                onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
-              />
-            </NoSSR>
-          </Box>
-
-          {/* Botones */}
-          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={loading}
-              sx={{ minWidth: 200 }}
-            >
-              {loading ? 'Actualizando...' : 'Actualizar Actividad'}
-            </Button>
-            
-            <Button
               variant="outlined"
-              size="large"
-              onClick={() => router.back()}
-              disabled={loading}
-            >
-              Cancelar
-            </Button>
-          </Box>
-        </Box>
+              value={newCategory.name}
+              onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              margin="dense"
+              label="Descripción"
+              fullWidth
+              multiline
+              rows={3}
+              variant="outlined"
+              value={newCategory.description}
+              onChange={(e) => setNewCategory(prev => ({ ...prev, description: e.target.value }))}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenCategoryDialog(false)}>Cancelar</Button>
+            <Button onClick={handleCreateCategory} variant="contained">Crear</Button>
+          </DialogActions>
+        </Dialog>
 
-        {/* Loading overlay */}
-        {loading && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 9999,
-            }}
-          >
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h6">Actualizando actividad...</Typography>
-            </Paper>
-          </Box>
-        )}
-      </Paper>
-
-      {/* Diálogos para crear categoría */}
-      <Dialog open={openCategoryDialog} onClose={() => setOpenCategoryDialog(false)}>
-        <DialogTitle>Crear Nueva Categoría</DialogTitle>
-        <DialogContent>
-          {categoryError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {categoryError}
-            </Alert>
-          )}
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Nombre"
-            fullWidth
-            variant="outlined"
-            value={newCategory.name}
-            onChange={(e) => setNewCategory(prev => ({ ...prev, name: e.target.value }))}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label="Descripción"
-            fullWidth
-            multiline
-            rows={3}
-            variant="outlined"
-            value={newCategory.description}
-            onChange={(e) => setNewCategory(prev => ({ ...prev, description: e.target.value }))}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCategoryDialog(false)}>Cancelar</Button>
-          <Button onClick={handleCreateCategory} variant="contained">Crear</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Diálogos para crear ubicación */}
-      <Dialog open={openLocationDialog} onClose={() => setOpenLocationDialog(false)}>
-        <DialogTitle>Crear Nueva Ubicación</DialogTitle>
-        <DialogContent>
-          {locationError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {locationError}
-            </Alert>
-          )}
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Nombre"
-            fullWidth
-            variant="outlined"
-            value={newLocation.name}
-            onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            label="Dirección"
-            fullWidth
-            variant="outlined"
-            value={newLocation.address}
-            onChange={(e) => setNewLocation(prev => ({ ...prev, address: e.target.value }))}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenLocationDialog(false)}>Cancelar</Button>
-          <Button onClick={handleCreateLocation} variant="contained">Crear</Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+        {/* Diálogos para crear ubicación */}
+        <Dialog open={openLocationDialog} onClose={() => setOpenLocationDialog(false)}>
+          <DialogTitle>Crear Nueva Ubicación</DialogTitle>
+          <DialogContent>
+            {locationError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {locationError}
+              </Alert>
+            )}
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Nombre"
+              fullWidth
+              variant="outlined"
+              value={newLocation.name}
+              onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              margin="dense"
+              label="Dirección"
+              fullWidth
+              variant="outlined"
+              value={newLocation.address}
+              onChange={(e) => setNewLocation(prev => ({ ...prev, address: e.target.value }))}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenLocationDialog(false)}>Cancelar</Button>
+            <Button onClick={handleCreateLocation} variant="contained">Crear</Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </ProtectedRoute>
   );
 } 

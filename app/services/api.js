@@ -1,5 +1,6 @@
 import { handleApiError } from './errorHandler';
 import useAuthStore from '../store/authStore';
+import {ApiError } from '../assets/ApiErrorTemplate';
 
 //const BASE_URL = 'https://israel-hatzeira.onrender.com/api';
 export const BASE_URL = 'http://localhost:4455/api';
@@ -11,7 +12,7 @@ class ApiService {
 
     getToken() {
         const { token } = useAuthStore.getState();
-        
+
         return token;
     }
 

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Login from './login/page';
+import Welcome from './welcome/page';
 import { Box, Typography, AppBar, Toolbar, Container, Paper, TextField, Button, Grid, Card, CardMedia, CardContent, Divider, List, ListItem, ListItemIcon, ListItemText, Accordion, AccordionSummary, AccordionDetails, useMediaQuery, Modal, IconButton } from '@mui/material';
 import Image from 'next/image';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -22,6 +24,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import HistoryIcon from '@mui/icons-material/History';
 import { useRouter } from 'next/navigation';
 import useAuthStore from './store/authStore';
+import ProtectedRoute from '../app/components/ProtectedRoute'
 
 // Paleta de colores consistente
 const theme = {
@@ -56,6 +59,8 @@ const menuItems = [
   { id: 'events', label: 'Encuentros', active: false },
   { id: 'gallery', label: 'Galería', active: false },
   { id: 'contact', label: 'Contacto', active: false },
+    { id: 'activities', label: 'Actividades', active: false , external : true},
+
 ];
 
 // Imágenes del carrusel principal
@@ -1001,7 +1006,6 @@ function Header({ menuItems, logo }) {
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
   const user = useAuthStore((state) => state.user);
 
-  console.log(user)
   const handleMenuClick = (item) => {
     const element = document.getElementById(item.id);
     if (element) {
@@ -1018,7 +1022,7 @@ function Header({ menuItems, logo }) {
     await authStore.logout();
     router.push('/login');
   };
-  
+
   return (
     <AppBar 
       position="sticky" 
@@ -1092,8 +1096,8 @@ function Header({ menuItems, logo }) {
                 key={i}
                 color="inherit"
                 onClick={() => handleMenuClick(item)}
-                sx={{ 
-                  fontWeight: item.active ? 600 : 400, 
+                sx={{
+                  fontWeight: item.active ? 600 : 400,
                   color: item.active ? theme.primary.main : theme.text.secondary,
                   borderBottom: item.active ? `2px solid ${theme.primary.main}` : 'none',
                   borderRadius: '4px 4px 0 0',
@@ -1113,20 +1117,20 @@ function Header({ menuItems, logo }) {
               </Button>
             ))}
           </Box>
-          
+
           {isLoggedIn ? (
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
               gap: 1,
               bgcolor: `${theme.primary.main}10`,
               borderRadius: 2,
               px: 2,
               py: 1
             }}>
-              <Typography 
-                variant="body1" 
-                sx={{ 
+              <Typography
+                variant="body1"
+                sx={{
                   color: theme.primary.main,
                   fontWeight: 500
                 }}
@@ -1252,18 +1256,35 @@ function Footer() {
 }
 
 export default function Home() {
+    const [loading, setLoading] = useState(true);
+    const isMobile = useMediaQuery('(max-width:600px)');
+    const isTablet = useMediaQuery('(max-width:960px)');
+    const { hydrate, isHydrated } = useAuthStore();
+
+    useEffect(() => {
+        hydrate();
+        setLoading(false);
+    }, []);
+
+    if (loading) {
+        return null;
+    }
+
+
+    if (loading) {
+    return null;
+  }
 
   return (
+<ProtectedRoute>
     <Box sx={{ minHeight: '100vh', bgcolor: theme.background.default }}>
       <Header menuItems={menuItems} />
-
       <Carousel images={carouselImages} />
 
       {pageSections.map((section) => (
         <SectionRenderer key={section.id} section={section} />
       ))}
-
       <Footer />
     </Box>
-  )
+</ProtectedRoute>);
 } 

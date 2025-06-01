@@ -5,7 +5,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import styles from './menuOptions.style.css'
+import styles from './menuOptions.module.css'
 
 
 const StyledMenu = styled((props) => (
@@ -70,8 +70,8 @@ export default function ReusableMenu({
         setAnchorEl(null);
     };
 
-    const handleMenuItemClick = (onClick) => {
-        onClick();
+    const handleMenuItemClick = (onClick, data) => {
+        onClick(data);
         handleClose();
     };
 
@@ -111,7 +111,7 @@ export default function ReusableMenu({
                     return (
                         <MenuItem
                             key={item.id}
-                            onClick={() => handleMenuItemClick(item.onClick)}
+                            onClick={() => handleMenuItemClick(item.onClick, item.data)}
                             disabled={item.disabled}
                             disableRipple
                         >
