@@ -3,22 +3,26 @@ import useAuthStore from '../store/authStore';
 import {ApiError } from '../assets/ApiErrorTemplate';
 
 //const BASE_URL = 'https://israel-hatzeira.onrender.com/api';
-const BASE_URL = 'http://localhost:4455/api';
+export const BASE_URL = 'http://localhost:4455/api';
+
 class ApiService {
     constructor() {
         this.baseURL = BASE_URL;
-        this.token = null
-    }
-
-    setToken(token) {
-        this.token = token;
     }
 
     getToken() {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('token');
+        const { token } = useAuthStore.getState();
+
+        return token;
+    }
+
+    setToken(token) {
+        const authStore = useAuthStore.getState();
+        if (token) {
+            authStore.login(authStore.user, token);
+        } else {
+            authStore.logout();
         }
-        return null;
     }
 
     getHeaders() {

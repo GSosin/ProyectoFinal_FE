@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Button, Typography, Alert } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import Form from '../../components/generics/form/Form';
@@ -13,6 +13,13 @@ const LoginForm = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(null);
     const login = useAuthStore(state => state.login);
+    const isLoggedIn = useAuthStore(state => state.isLoggedIn);
+
+    useEffect(() => {
+        if (isLoggedIn) {
+            router.replace('/');
+        }
+    }, [isLoggedIn, router]);
 
     const fields = [
         {
@@ -53,15 +60,20 @@ const LoginForm = () => {
             localStorage.setItem('token', response.token);
 
             // Obtenemos la ruta de redirección guardada
-            const redirectPath = localStorage.getItem('redirectPath') || '/welcome';
+            const redirectPath = localStorage.getItem('redirectPath') || '/';
             localStorage.removeItem('redirectPath'); // Limpiamos la ruta guardada
             
             // Redirigimos al usuario
-            router.push(redirectPath);
+            router.replace(redirectPath);
         } catch (error) {
             setError(error.message || 'Ocurrió un error al intentar iniciar sesión');
         }
     };
+
+    // Si está logueado, no renderizamos nada mientras se realiza la redirección
+    if (isLoggedIn) {
+        return null;
+    }
 
     return (
         <div className={styles.container}>

@@ -5,7 +5,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import styles from './menuOptions.style.css'
+import styles from './menuOptions.module.css'
 
 
 const StyledMenu = styled((props) => (
