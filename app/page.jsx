@@ -23,6 +23,8 @@ import EventIcon from '@mui/icons-material/Event';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import MailIcon from '@mui/icons-material/Mail';
 import HistoryIcon from '@mui/icons-material/History';
+import ProtectedRoute from '../app/components/ProtectedRoute'
+import { useRouter } from 'next/navigation';
 
 // Paleta de colores consistente
 const theme = {
@@ -57,7 +59,10 @@ const menuItems = [
   { id: 'events', label: 'Encuentros', active: false },
   { id: 'gallery', label: 'Galería', active: false },
   { id: 'contact', label: 'Contacto', active: false },
+    { id: 'activities', label: 'Actividades', active: false , external : true},
+
 ];
+
 
 // Imágenes del carrusel principal
 const carouselImages = [
@@ -1069,7 +1074,7 @@ function Header({ menuItems, logo }) {
             <Button
               key={i}
               color="inherit"
-              href={`#${item.id}`}
+              href={!item.external ? `#${item.id}` : item.id}
               sx={{ 
                 fontWeight: item.active ? 600 : 400, 
                 color: item.active ? theme.primary.main : theme.text.secondary,
@@ -1177,6 +1182,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const isMobile = useMediaQuery('(max-width:600px)');
   const isTablet = useMediaQuery('(max-width:960px)');
+  const router = useRouter();
 
   useEffect(() => {
     checkAuth();
@@ -1188,6 +1194,9 @@ export default function Home() {
   }
 
   return (
+<ProtectedRoute>
+
+
     <Box sx={{ minHeight: '100vh', bgcolor: theme.background.default }}>
       {/* Header mejorado */}
       <Header menuItems={menuItems} />
@@ -1203,5 +1212,6 @@ export default function Home() {
       {/* Footer */}
       <Footer />
     </Box>
-  );
+
+</ProtectedRoute>);
 } 

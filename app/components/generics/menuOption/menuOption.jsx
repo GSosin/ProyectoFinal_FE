@@ -70,8 +70,8 @@ export default function ReusableMenu({
         setAnchorEl(null);
     };
 
-    const handleMenuItemClick = (onClick) => {
-        onClick();
+    const handleMenuItemClick = (onClick, data) => {
+        onClick(data);
         handleClose();
     };
 
@@ -111,7 +111,7 @@ export default function ReusableMenu({
                     return (
                         <MenuItem
                             key={item.id}
-                            onClick={() => handleMenuItemClick(item.onClick)}
+                            onClick={() => handleMenuItemClick(item.onClick, item.data)}
                             disabled={item.disabled}
                             disableRipple
                         >

@@ -1,16 +1,24 @@
 import { handleApiError } from './errorHandler';
 import useAuthStore from '../store/authStore';
+import {ApiError } from '../assets/ApiErrorTemplate';
 
 //const BASE_URL = 'https://israel-hatzeira.onrender.com/api';
 const BASE_URL = 'http://localhost:4455/api';
 class ApiService {
     constructor() {
         this.baseURL = BASE_URL;
-        this.token = null;
+        this.token = null
     }
 
     setToken(token) {
         this.token = token;
+    }
+
+    getToken() {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('token');
+        }
+        return null;
     }
 
     getHeaders() {
@@ -18,8 +26,9 @@ class ApiService {
             'Content-Type': 'application/json',
         };
 
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
+        const token = this.getToken();
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
         }
 
         return headers;
