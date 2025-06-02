@@ -54,4 +54,11 @@ if (typeof window !== 'undefined') {
   });
 }
 
-export default useAuthStore; 
+export default useAuthStore;
+
+export const selectUserPermissions = (state) => {
+  if (state.user?.role?.permissions) return state.user.role.permissions;
+  return state.user?.permissions || [];
+};
+
+export const isAdminSelector = (state) => state.user?.role?.name === 'Administrador'; 

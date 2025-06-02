@@ -11,9 +11,6 @@ const WelcomeContent = () => {
 
     const handleStart = () => {
         router.push('/activities');
-
-      //  router.push('/activities/create');
-
     };
 
     return (

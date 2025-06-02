@@ -17,19 +17,13 @@ class ApiService {
     }
 
     setToken(token) {
-        const authStore = useAuthStore.getState();
-        if (token) {
-            authStore.login(authStore.user, token);
-        } else {
-            authStore.logout();
-        }
+        this.token = token;
     }
 
     getHeaders() {
         const headers = {
             'Content-Type': 'application/json',
         };
-
         const token = this.getToken();
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -40,7 +34,9 @@ class ApiService {
 
     async request(endpoint, options = {}) {
         try {
+
             const headers = this.getHeaders();
+
             const response = await fetch(`${this.baseURL}${endpoint}`, {
                 ...options,
                 headers: {
