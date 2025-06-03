@@ -62,7 +62,6 @@ export default function Header() {
       }
     } else {
       router.push(path);
-      window.location.hash = '';
     }
   };
 

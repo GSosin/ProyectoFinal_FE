@@ -1,10 +1,12 @@
-﻿import React, { useState } from "react";
+﻿'use client';
+import React, { useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Divider from "@mui/material/Divider";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { Box } from "@mui/material";
 
 const StyledMenu = styled((props) => (
   <Menu
@@ -43,9 +45,24 @@ const StyledMenu = styled((props) => (
         ),
       },
     },
-    ...theme.applyStyles("dark", {
-      color: theme.palette.grey[300],
-    }),
+  },
+}));
+
+const MenuTrigger = styled(Box)(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '6px 16px',
+  borderRadius: theme.shape.borderRadius,
+  cursor: 'pointer',
+  userSelect: 'none',
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  '&:disabled': {
+    cursor: 'default',
+    pointerEvents: 'none',
+    opacity: 0.6,
   },
 }));
 
@@ -56,11 +73,13 @@ export default function ReusableMenu({
   buttonColor = "primary",
   disabled = false,
   size = "medium",
+  insideButton = false,
 }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
@@ -73,27 +92,57 @@ export default function ReusableMenu({
     handleClose();
   };
 
-  return (
-    <div onClick={(e) => e.stopPropagation()}>
+  const commonProps = {
+    id: "reusable-menu-button",
+    'aria-controls': open ? "reusable-menu" : undefined,
+    'aria-haspopup': "true",
+    'aria-expanded': open ? "true" : undefined,
+    onClick: handleClick,
+    disabled: disabled,
+  };
+
+  const renderTrigger = () => {
+    if (insideButton) {
+      return (
+        <MenuTrigger
+          {...commonProps}
+          sx={{
+            color: buttonColor === 'primary' ? 'primary.main' : 'inherit',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            textTransform: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+          }}
+        >
+          {buttonText}
+          <KeyboardArrowDownIcon />
+        </MenuTrigger>
+      );
+    }
+
+    return (
       <Button
-        id="reusable-menu-button"
-        aria-controls={open ? "reusable-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
+        {...commonProps}
         variant={buttonVariant}
         color={buttonColor}
         size={size}
-        disabled={disabled}
         disableElevation
-        onClick={handleClick}
         endIcon={<KeyboardArrowDownIcon />}
       >
         {buttonText}
       </Button>
+    );
+  };
+
+  return (
+    <div onClick={(e) => e.stopPropagation()}>
+      {renderTrigger()}
       <StyledMenu
         id="reusable-menu"
         MenuListProps={{
-          "aria-labelledby": "reusable-menu-button",
+          'aria-labelledby': "reusable-menu-button",
         }}
         anchorEl={anchorEl}
         open={open}
