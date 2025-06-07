@@ -51,6 +51,14 @@ const Admin = () => {
           >
             Ver Todas las Actividades
           </Button>
+          <Button
+            variant="contained"
+            color="info"
+            onClick={() => handleNavigation('/gestionUsuarios')}
+            fullWidth
+          >
+            Gestionar Usuarios
+          </Button>
         </Stack>
       </Paper>
     </Box>
