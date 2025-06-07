@@ -20,10 +20,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  TableSortLabel,
+  Paper,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import SearchIcon from "@mui/icons-material/Search";
 import { apiService } from "../services/api";
 import styles from "./Activities.module.css";
 import EditIcon from "@mui/icons-material/Edit";
@@ -38,15 +42,25 @@ import AccessControl from "../components/AccessControl";
 const ActivitiesPage = () => {
   const router = useRouter();
   const [activities, setActivities] = useState([]);
+  const [filteredActivities, setFilteredActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState({ open: false, id: null });
+  const [searchFilters, setSearchFilters] = useState({
+    title: '',
+    category: '',
+    location: '',
+    status: ''
+  });
+  const [orderBy, setOrderBy] = useState('startDate');
+  const [order, setOrder] = useState('desc');
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
         const data = await apiService.get("/activities");
         setActivities(data);
+        setFilteredActivities(data);
       } catch (err) {
         setError("Error al cargar las actividades");
         console.error(err);
@@ -58,12 +72,70 @@ const ActivitiesPage = () => {
     fetchActivities();
   }, []);
 
+  useEffect(() => {
+    // Filtrar actividades cuando cambian los filtros
+    const filtered = activities.data?.filter(activity => {
+      const searchTermLower = (term) => term.toLowerCase();
+      return (
+        activity.title.toLowerCase().includes(searchTermLower(searchFilters.title)) &&
+        (activity.Category?.name || '').toLowerCase().includes(searchTermLower(searchFilters.category)) &&
+        (activity.Location?.name || '').toLowerCase().includes(searchTermLower(searchFilters.location)) &&
+        activity.status.toLowerCase().includes(searchTermLower(searchFilters.status))
+      );
+    });
+
+    // Aplicar ordenamiento
+    const sorted = [...(filtered || [])].sort((a, b) => {
+      const isAsc = order === 'asc';
+      let comparison = 0;
+
+      switch (orderBy) {
+        case 'title':
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case 'startDate':
+          comparison = new Date(a.startDate) - new Date(b.startDate);
+          break;
+        case 'category':
+          comparison = (a.Category?.name || '').localeCompare(b.Category?.name || '');
+          break;
+        case 'location':
+          comparison = (a.Location?.name || '').localeCompare(b.Location?.name || '');
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
+          break;
+        default:
+          comparison = 0;
+      }
+
+      return isAsc ? comparison : -comparison;
+    });
+
+    setFilteredActivities({ ...activities, data: sorted });
+  }, [searchFilters, activities, orderBy, order]);
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const handleSearchChange = (field) => (event) => {
+    setSearchFilters(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
   const handleViewActivity = (id) => {
     router.push(`/activities/${id}`);
   };
+
   const handleCreateActivity = () => {
     router.push("/activities/create");
   };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("es-ES", {
       day: "numeric",
@@ -71,6 +143,7 @@ const ActivitiesPage = () => {
       year: "numeric",
     });
   };
+
   if (loading) {
     return (
       <Box
@@ -85,6 +158,7 @@ const ActivitiesPage = () => {
       </Box>
     );
   }
+
   if (error) {
     return (
       <Container maxWidth="lg" sx={{ py: 4, textAlign: "center" }}>
@@ -102,7 +176,6 @@ const ActivitiesPage = () => {
     );
   }
 
-  //dropdown options
   const handleEdit = (id) => {
     showMessage("Función de editar ejecutada");
     console.log("Editando elemento...");
@@ -179,7 +252,112 @@ const ActivitiesPage = () => {
           </AccessControl>
         </Box>
 
-        {activities.length === 0 ? (
+        {/* Filtros de búsqueda */}
+        <Box sx={{ mb: 3 }}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Buscar por título..."
+                value={searchFilters.title}
+                onChange={handleSearchChange('title')}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Buscar por categoría..."
+                value={searchFilters.category}
+                onChange={handleSearchChange('category')}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Buscar por ubicación..."
+                value={searchFilters.location}
+                onChange={handleSearchChange('location')}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Buscar por estado..."
+                value={searchFilters.status}
+                onChange={handleSearchChange('status')}
+                InputProps={{
+                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Opciones de ordenamiento */}
+        <Box sx={{ mb: 2 }}>
+          <Grid container spacing={2}>
+            <Grid item>
+              <TableSortLabel
+                active={orderBy === 'title'}
+                direction={orderBy === 'title' ? order : 'asc'}
+                onClick={() => handleRequestSort('title')}
+              >
+                Título
+              </TableSortLabel>
+            </Grid>
+            <Grid item>
+              <TableSortLabel
+                active={orderBy === 'startDate'}
+                direction={orderBy === 'startDate' ? order : 'asc'}
+                onClick={() => handleRequestSort('startDate')}
+              >
+                Fecha
+              </TableSortLabel>
+            </Grid>
+            <Grid item>
+              <TableSortLabel
+                active={orderBy === 'category'}
+                direction={orderBy === 'category' ? order : 'asc'}
+                onClick={() => handleRequestSort('category')}
+              >
+                Categoría
+              </TableSortLabel>
+            </Grid>
+            <Grid item>
+              <TableSortLabel
+                active={orderBy === 'location'}
+                direction={orderBy === 'location' ? order : 'asc'}
+                onClick={() => handleRequestSort('location')}
+              >
+                Ubicación
+              </TableSortLabel>
+            </Grid>
+            <Grid item>
+              <TableSortLabel
+                active={orderBy === 'status'}
+                direction={orderBy === 'status' ? order : 'asc'}
+                onClick={() => handleRequestSort('status')}
+              >
+                Estado
+              </TableSortLabel>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {filteredActivities.data?.length === 0 ? (
           <Box className={styles.noActivities}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No hay actividades disponibles
@@ -195,7 +373,7 @@ const ActivitiesPage = () => {
           </Box>
         ) : (
           <Grid container spacing={3}>
-            {activities.data.map((activity) => {
+            {filteredActivities.data?.map((activity) => {
               const mainImage = activity.images.find((image) => image.main);
               const simpleMenuItems = [
                 {
