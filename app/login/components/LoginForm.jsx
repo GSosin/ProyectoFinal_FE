@@ -99,6 +99,15 @@ const LoginForm = () => {
                         Registrate aqui
                     </Button>
                 </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                    <Button 
+                        variant="text" 
+                        color="primary" 
+                        onClick={() => router.push('/forgot-password')}
+                    >
+                        ¿Olvidaste tu contraseña?
+                    </Button>
+                </Typography>
             </Card>
         </div>
     );

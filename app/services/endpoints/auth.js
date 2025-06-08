@@ -54,5 +54,22 @@ export const authEndpoints = {
             }
             throw new ApiError(handledError.message, handledError.status, handledError.data);
         }
+    },
+    async requestPasswordReset(email) {
+        try {
+            return await apiService.post('/auth/forgot-password', { email });
+        } catch (error) {
+            const handledError = handleApiError(error);
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
+        }
+    },
+
+    async resetPassword(token, newPassword) {
+        try {
+            return await apiService.post('/auth/reset-password', { token, newPassword });
+        } catch (error) {
+            const handledError = handleApiError(error);
+            throw new ApiError(handledError.message, handledError.status, handledError.data);
+        }
     }
 };
