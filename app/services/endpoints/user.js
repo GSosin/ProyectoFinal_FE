@@ -3,7 +3,7 @@ import { apiService } from '../api';
 export const userService = {
   getAllUsers: async () => {
     try {
-      const response = await apiService.get('/users/all');
+      const response = await apiService.get('/users');
       return response.data;
     } catch (error) {
       console.error('Error fetching users:', error);

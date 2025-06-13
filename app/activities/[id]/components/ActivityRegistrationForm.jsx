@@ -15,23 +15,16 @@ import {
 } from '@mui/material';
 import { apiService } from '../../../services/api';
 import { useRouter } from 'next/navigation';
+import useAuthStore from '../../../store/authStore';
 
 const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
+    const user = useAuthStore((state) => state.user);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [user, setUser] = useState(null);
     const [comments, setComments] = useState('');
 
-    // Verificar si el usuario está autenticado al abrir el diálogo
-    const checkAuth = async () => {
-        try {
-            const response = await apiService.get('/auth/me');
-            setUser(response);
-        } catch (error) {
-            setUser(null);
-        }
-    };
+    console.log(user);
 
     const handleActivityRegistration = async () => {
         setLoading(true);
@@ -51,13 +44,6 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
         onClose();
         router.push('/register');
     };
-
-    // Verificar autenticación cuando se abre el diálogo
-    useEffect(() => {
-        if (open) {
-            checkAuth();
-        }
-    }, [open]);
 
     if (!user) {
         return (
@@ -124,7 +110,7 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
             <DialogContent>
                 <Box sx={{ mt: 2, textAlign: 'center' }}>
                     <Typography variant="body1" sx={{ mb: 3 }}>
-                        ¿{user.name}, deseas confirmar tu asistencia a la actividad "{activity.title}"?
+                        ¿{user.firstName}, deseas confirmar tu asistencia a la actividad "{activity.title}"?
                     </Typography>
                     
                     <TextField

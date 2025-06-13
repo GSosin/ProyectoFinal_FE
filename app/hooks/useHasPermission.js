@@ -1,13 +1,22 @@
-import { useCallback } from 'react';
-import useAuthStore, { selectUserPermissions } from '../store/authStore';
+import { useMemo } from 'react';
+import useAuthStore from '../store/authStore';
+import { useShallow } from 'zustand/react/shallow';
+
+// Create a stable selector outside the hook
+const selectPermissions = (state) => {
+  if (state.user?.role?.permissions) return state.user.role.permissions;
+  return state.user?.permissions || [];
+};
 
 export default function useHasPermission(permission) {
-  const permissions = useAuthStore(selectUserPermissions);
+  // Get permissions using shallow comparison
+  const permissions = useAuthStore(
+    useShallow(selectPermissions)
+  );
 
-  const hasPermission = useCallback(() => {
+  // Check if user has the required permission
+  return useMemo(() => {
     if (!permission) return false;
     return permissions.includes(permission);
-  }, [permissions, permission]);
-
-  return hasPermission();
+  }, [permission, permissions]);
 } 

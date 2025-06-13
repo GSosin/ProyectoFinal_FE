@@ -21,13 +21,21 @@ import {
     DialogContent,
     DialogActions,
     DialogContentText,
-    Tooltip
+    Tooltip,
+    IconButton,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import EditIcon from '@mui/icons-material/Edit';
+import PersonIcon from '@mui/icons-material/Person';
 import styles from './ActivityDetail.module.css';
 import { apiService } from '../../services/api';
 import parse from 'html-react-parser';
@@ -37,6 +45,8 @@ import {
     getStatusColor,
 } from '../../utils/activityUtils';
 import ClientDate from '../../components/ClientDate';
+import AccessControl from '../../components/AccessControl';
+import Link from 'next/link';
 
 const ActivityDetail = () => {
     const params = useParams();
@@ -50,6 +60,11 @@ const ActivityDetail = () => {
     const [isEnrolled, setIsEnrolled] = useState(false);
     const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
     const user = useAuthStore((state) => state.user);
+    const [editCapacityDialogOpen, setEditCapacityDialogOpen] = useState(false);
+    const [newCapacity, setNewCapacity] = useState('');
+    const [editLoading, setEditLoading] = useState(false);
+    const [teachers, setTeachers] = useState([]);
+    const [selectedTeacher, setSelectedTeacher] = useState('');
 
     const isActivityInProgress = activity && activity.status === 'En curso';
     const isActivityCompleted = activity && activity.status === 'Completada';
@@ -72,9 +87,9 @@ const ActivityDetail = () => {
                 
                 if (isLoggedIn && user) {
                     try {
-                        const {data: enrollments} = await apiService.get(`/activities/${params.id}/enrollments`);
-                        const userEnrollment = enrollments.find(e => e.userId === user.id);
-                        setIsEnrolled(!!userEnrollment);
+                        const ownEnrollment = await apiService.get(`/activities/${params.id}/enrollments/own`);
+                        const isEnrolled = ownEnrollment.data.filter(enrollment => enrollment.status.toLowerCase() === 'activa').length;
+                        setIsEnrolled(!!isEnrolled);
                     } catch (err) {
                         console.error('Error checking enrollment:', err);
                     }
@@ -88,6 +103,24 @@ const ActivityDetail = () => {
 
         loadActivity();
     }, [params.id, isLoggedIn, user]);
+
+    useEffect(() => {
+        const fetchTeachers = async () => {
+            try {
+                const {data: teachersList} = await apiService.get('/users/teachers');
+                setTeachers(teachersList);
+            } catch (err) {
+                // Puedes mostrar un error si quieres
+            }
+        };
+        fetchTeachers();
+    }, []);
+
+    useEffect(() => {
+        if (activity && activity.teacherId) {
+            setSelectedTeacher(activity.teacherId);
+        }
+    }, [activity]);
 
     const handleCancelEnrollment = async () => {
         try {
@@ -105,6 +138,42 @@ const ActivityDetail = () => {
                 message: 'Error al cancelar la inscripción: ' + (error.message || 'Error desconocido'),
                 severity: 'error'
             });
+        }
+    };
+
+    const handleUpdateCapacity = async () => {
+        if (!newCapacity || newCapacity < 1) {
+            setSnackbar({
+                open: true,
+                message: 'La capacidad debe ser un número mayor a 0',
+                severity: 'error'
+            });
+            return;
+        }
+
+        setEditLoading(true);
+        try {
+            const updatedActivity = {
+                ...activity,
+                maxCapacity: parseInt(newCapacity),
+                teacherId: selectedTeacher
+            };
+            await apiService.put(`/activities/${activity.id}`, updatedActivity);
+            setActivity(updatedActivity);
+            setEditCapacityDialogOpen(false);
+            setSnackbar({
+                open: true,
+                message: 'Capacidad actualizada exitosamente',
+                severity: 'success'
+            });
+        } catch (error) {
+            setSnackbar({
+                open: true,
+                message: 'Error al actualizar la capacidad: ' + (error.message || 'Error desconocido'),
+                severity: 'error'
+            });
+        } finally {
+            setEditLoading(false);
         }
     };
 
@@ -537,12 +606,82 @@ const ActivityDetail = () => {
                                 }}>
                                     <PeopleIcon sx={{ color: 'success.dark' }} />
                                 </Box>
-                                <Box>
+                                <Box sx={{ flex: 1 }}>
                                     <Typography variant="subtitle2" color="text.secondary">
                                         Participantes
                                     </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Typography variant="body1" fontWeight="medium">
+                                            Capacidad máxima: {activity.maxCapacity} personas
+                                        </Typography>
+                                        <AccessControl permission="manage_activities">
+                                            <IconButton 
+                                                size="small" 
+                                                onClick={() => {
+                                                    setNewCapacity(activity.maxCapacity.toString());
+                                                    setEditCapacityDialogOpen(true);
+                                                }}
+                                                sx={{ 
+                                                    color: 'primary.main',
+                                                    '&:hover': {
+                                                        backgroundColor: 'primary.light',
+                                                        color: 'primary.dark'
+                                                    }
+                                                }}
+                                            >
+                                                <EditIcon fontSize="small" />
+                                            </IconButton>
+                                        </AccessControl>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Box sx={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: 2,
+                                backgroundColor: 'white',
+                                p: 2,
+                                borderRadius: '10px',
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.04)'
+                            }}>
+                                <Box sx={{ 
+                                    backgroundColor: 'info.light', 
+                                    p: 1.5, 
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    <PersonIcon sx={{ color: 'info.dark' }} />
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2" color="text.secondary">
+                                        Docente asignado
+                                    </Typography>
                                     <Typography variant="body1" fontWeight="medium">
-                                        Capacidad máxima: {activity.maxCapacity} personas
+                                        {(() => {
+                                            const teacher = teachers.find(t => String(t.id) === String(activity?.teacherId));
+                                            return teacher ? (
+                                                <Link href={`/teachers/${teacher.id}`} passHref legacyBehavior>
+                                                    <Box
+                                                        component="a"
+                                                        sx={{
+                                                            color: 'primary.main',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            fontWeight: 600,
+                                                            transition: 'color 0.2s',
+                                                            '&:hover': { color: 'primary.dark' }
+                                                        }}
+                                                    >
+                                                        {teacher.firstName} {teacher.lastName}
+                                                    </Box>
+                                                </Link>
+                                            ) : (
+                                                <span style={{ color: '#888' }}>Sin docente asignado</span>
+                                            );
+                                        })()}
                                     </Typography>
                                 </Box>
                             </Box>
@@ -710,7 +849,7 @@ const ActivityDetail = () => {
                                     color="primary" 
                                     fullWidth
                                     onClick={() => router.push('/login')}
-                                    disabled={isRegistrationDisabled(activity)}
+                                    disabled={isRegistrationDisabled}
                                     sx={{ 
                                         mt: 2,
                                         py: 1.5,
@@ -811,6 +950,54 @@ const ActivityDetail = () => {
                     });
                 }}
             />
+
+            <Dialog
+                open={editCapacityDialogOpen}
+                onClose={() => setEditCapacityDialogOpen(false)}
+                aria-labelledby="edit-capacity-dialog-title"
+            >
+                <DialogTitle id="edit-capacity-dialog-title">
+                    Editar Capacidad Máxima
+                </DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Capacidad máxima"
+                        type="number"
+                        fullWidth
+                        variant="outlined"
+                        value={newCapacity}
+                        onChange={(e) => setNewCapacity(e.target.value)}
+                        inputProps={{ min: 1 }}
+                        sx={{ mt: 2 }}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ p: 2, pt: 0 }}>
+                    <Button 
+                        onClick={() => setEditCapacityDialogOpen(false)}
+                        variant="outlined"
+                        sx={{ 
+                            textTransform: 'none',
+                            fontWeight: 'medium'
+                        }}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button 
+                        onClick={handleUpdateCapacity}
+                        variant="contained"
+                        color="primary"
+                        disabled={editLoading}
+                        sx={{ 
+                            textTransform: 'none',
+                            fontWeight: 'medium'
+                        }}
+                    >
+                        {editLoading ? 'Guardando...' : 'Guardar'}
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Snackbar
                 open={snackbar.open}
