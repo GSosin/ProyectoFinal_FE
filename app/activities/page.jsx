@@ -9,20 +9,16 @@ import {
   Grid,
   Card,
   CardContent,
-  CardMedia,
   CardActionArea,
   Chip,
   Button,
   CircularProgress,
-  ImageListItem,
-  ImageList,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
   TableSortLabel,
-  Paper,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -136,14 +132,6 @@ const ActivitiesPage = () => {
     router.push("/activities/create");
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
   if (loading) {
     return (
       <Box
@@ -177,8 +165,7 @@ const ActivitiesPage = () => {
   }
 
   const handleEdit = (id) => {
-    showMessage("Función de editar ejecutada");
-    console.log("Editando elemento...");
+    router.push(`/activities/${id}/edit`);
   };
 
   const handleDelete = async (id) => {
@@ -208,7 +195,7 @@ const ActivitiesPage = () => {
 
   return (
     <ProtectedRoute>
-      <Container maxWidth="lg" className={styles.container}>
+      <Container maxWidth={false} disableGutters className={styles.container}>
         <Box
           sx={{
             display: "flex",
@@ -393,16 +380,21 @@ const ActivitiesPage = () => {
               ];
 
               return (
-                <Grid item xs={12} sm={6} md={4} key={activity.id}>
+                <Grid item xs={12} sm={6} md={4} key={activity.id} sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Card
                     className={styles.card}
                     sx={{
                       boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
-                      height: "100%",
+                      height: "400px",
+                      width: { xs: '100%', sm: '360px', md: '400px' },
+                      maxWidth: '100%',
                       display: "flex",
                       flexDirection: "column",
-                      minHeight: 420,
-                      maxHeight: 480,
+                      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                        boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+                      }
                     }}
                   >
                     <CardActionArea
@@ -414,53 +406,67 @@ const ActivitiesPage = () => {
                         alignItems: "stretch",
                       }}
                     >
-                      <ImageList
-                        cols={4}
-                        gap={10}
-                        className={styles.image}
-                        sx={{ minHeight: 200, maxHeight: 200, height: 200 }}
-                      >
-                        {mainImage && (
-                          <ImageListItem key={mainImage.id}>
-                            <img
-                              src={mainImage.url}
-                              alt={`Imagen de ${activity.title}`}
-                              loading="lazy"
-                              className={styles.activityImage}
-                              style={{
-                                width: "100%",
-                                height: "200px",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                              }}
-                            />
-                          </ImageListItem>
-                        )}
-                      </ImageList>
                       <Box
                         sx={{
-                          position: "absolute",
-                          top: "16px",
-                          right: "16px",
-                          zIndex: 1,
+                          position: "relative",
+                          width: "100%",
+                          height: 160,
+                          overflow: "hidden",
                         }}
                       >
-                        <Chip
-                          label={activity.status}
-                          color={getStatusColor(activity.status)}
-                          size="small"
+                        {mainImage ? (
+                          <img
+                            src={mainImage.url}
+                            alt={`Imagen de ${activity.title}`}
+                            loading="lazy"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: "100%",
+                              height: "100%",
+                              bgcolor: "grey.200",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Typography color="text.secondary">
+                              Sin imagen
+                            </Typography>
+                          </Box>
+                        )}
+                        <Box
                           sx={{
-                            fontWeight: "bold",
-                            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                            position: "absolute",
+                            top: "16px",
+                            right: "16px",
+                            zIndex: 1,
                           }}
-                        />
+                        >
+                          <Chip
+                            label={activity.status}
+                            color={getStatusColor(activity.status)}
+                            size="small"
+                            sx={{
+                              fontWeight: "bold",
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                            }}
+                          />
+                        </Box>
                       </Box>
                       <CardContent
                         sx={{
                           flexGrow: 1,
                           display: "flex",
                           flexDirection: "column",
-                          justifyContent: "space-between",
+                          p: 2,
+                          minHeight: 0,
                         }}
                       >
                         <Box
@@ -490,6 +496,8 @@ const ActivitiesPage = () => {
                             display: "-webkit-box",
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: "vertical",
+                            minHeight: "3.6em",
+                            mb: 2,
                           }}
                         >
                           {activity.title}
@@ -499,59 +507,68 @@ const ActivitiesPage = () => {
                             display: "flex",
                             flexDirection: "column",
                             gap: 1,
-                            mt: 2,
+                            mt: "auto",
                           }}
                         >
-                          <div>
-                            <Box
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <CalendarTodayIcon
+                              fontSize="small"
+                              sx={{ color: "primary.main", opacity: 0.8 }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
                               sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
-                              <CalendarTodayIcon
-                                fontSize="small"
-                                sx={{ color: "primary.main", opacity: 0.8 }}
+                              <ClientDate
+                                date={activity.startDate}
+                                formatStr="PPP"
                               />
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                <ClientDate
-                                  date={activity.startDate}
-                                  formatStr="PPP"
-                                />
-                              </Typography>
-                            </Box>
-                            <Box
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <LocationOnIcon
+                              fontSize="small"
+                              sx={{ color: "error.main", opacity: 0.8 }}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
                               sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
-                              <LocationOnIcon
-                                fontSize="small"
-                                sx={{ color: "error.main", opacity: 0.8 }}
-                              />
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                {activity.Location?.name || "Sin ubicación"}
-                              </Typography>
-                            </Box>
-                          </div>
+                              {activity.Location?.name || "Sin ubicación"}
+                            </Typography>
+                          </Box>
                           <AccessControl permission="manage_activities">
-                            <div className={styles.menuItems}>
+                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
                               <ReusableMenu
                                 buttonText="Acciones"
                                 menuItems={simpleMenuItems}
                                 buttonVariant="outlined"
                                 buttonColor="secondary"
+                                fullWidth
                               />
-                            </div>
+                            </Box>
                           </AccessControl>
                         </Box>
                       </CardContent>
