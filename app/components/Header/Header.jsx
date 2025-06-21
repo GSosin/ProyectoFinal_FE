@@ -39,6 +39,7 @@ const menuItems = [
   { id: "traditions", label: "Tradiciones", path: "/#traditions" },
   { id: "events", label: "Encuentros", path: "/#events" },
   { id: "activities", label: "Actividades", path: "/activities" },
+  { id: "news", label: "Noticias", path: "/news" },
 ];
 
 export default function Header() {
