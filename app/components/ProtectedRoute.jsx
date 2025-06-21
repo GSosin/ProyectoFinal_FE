@@ -8,7 +8,6 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermissions = [] }) =>
     const user = useAuthStore((state) => state.user);
     const isHydrated = useAuthStore((state) => state.isHydrated);
 
-
     useEffect(() => {
         if (!isHydrated) {
             return;
@@ -29,7 +28,9 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermissions = [] }) =>
 
         if (
             requiredPermissions.length > 0 &&
-            !requiredPermissions.some(permission => user?.permissions?.includes(permission))
+            !requiredPermissions.some(permission => {
+                return user?.role.permissions.some(p => p === permission)
+            })
         ) {
             router.replace('/unauthorized');
         }
@@ -47,10 +48,12 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermissions = [] }) =>
     if (requiredRole && user?.role?.name !== requiredRole) {
         return null;
     }
-
+    debugger
     if (
         requiredPermissions.length > 0 &&
-        !requiredPermissions.some(permission => user?.permissions?.includes(permission))
+        !requiredPermissions.some(permission => {
+            return user?.role.permissions.some(p => p === permission)
+        })
     ) {
         return null;
     }

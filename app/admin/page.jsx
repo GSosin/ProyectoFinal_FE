@@ -59,6 +59,14 @@ const Admin = () => {
           >
             Gestionar Usuarios
           </Button>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => handleNavigation('/admin/news')}
+            fullWidth
+          >
+            Crear Noticia
+          </Button>
         </Stack>
       </Paper>
     </Box>

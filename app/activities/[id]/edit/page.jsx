@@ -50,6 +50,24 @@ const DynamicDatePickers = dynamic(() => import('../../create/DynamicDatePickers
 
 const SunEditor = dynamic(() => import('suneditor-react'), { ssr: false });
 
+const editorOptions = {
+  buttonList: [
+    ['undo', 'redo'],
+    ['font', 'fontSize', 'formatBlock'],
+    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
+    ['fontColor', 'hiliteColor'],
+    ['removeFormat'],
+    ['outdent', 'indent'],
+    ['align', 'horizontalRule', 'list', 'lineHeight'],
+    ['table', 'link', 'image'],
+    ['fullScreen', 'showBlocks', 'codeView'],
+    ['preview']
+  ],
+  height: '400px',
+  placeholder: 'Escribe el contenido de la noticia aquí...',
+  defaultStyle: 'font-family: Arial, sans-serif; font-size: 14px;'
+};
+
 export default function EditActivity() {
   const params = useParams();
   const router = useRouter();
@@ -264,12 +282,7 @@ export default function EditActivity() {
               <SunEditor
                 onChange={(content) => handleInputChange('description', content)}
                 setContents={formData.description}
-                setOptions={{
-                  height: 320,
-                  buttonList: [
-                    ['bold', 'underline', 'italic', 'strike', 'list', 'align', 'fontSize', 'formatBlock', 'table', 'image']
-                  ]
-                }}
+                setOptions={editorOptions}
               />
           </Box>
 
