@@ -9,7 +9,6 @@ export default function TestUploadPage(props) {
     const [uploadedImages, setUploadedImages] = useState([]);
 
     const handleImagesUploaded = (images) => {
-        console.log('Imágenes subidas:', images);
         setUploadedImages(images);
     };
 

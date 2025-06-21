@@ -24,8 +24,6 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
     const [error, setError] = useState(null);
     const [comments, setComments] = useState('');
 
-    console.log(user);
-
     const handleActivityRegistration = async () => {
         setLoading(true);
         setError(null);

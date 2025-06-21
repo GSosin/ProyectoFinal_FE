@@ -71,7 +71,6 @@ const ImageUpload = ({ onImagesUploaded, multiple = false }) => {
             // Limpiar archivos seleccionados después de subir
             setSelectedFiles([]);
             
-            console.log('Imágenes subidas exitosamente:', uploadedImages);
         } catch (err) {
             setError('Error al subir las imágenes: ' + err.message);
             console.error('Error:', err);
