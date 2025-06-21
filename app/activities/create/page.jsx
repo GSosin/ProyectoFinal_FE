@@ -140,7 +140,6 @@ export default function CreateActivityPage(props) {
 
   // Actualizar descripción
   const handleEditorChange = (content) => {
-    console.log(content);
     setFormData(prev => ({ ...prev, description: content }));
   };
 
@@ -268,7 +267,6 @@ export default function CreateActivityPage(props) {
     const fetchTeachers = async () => {
       try {
         const {data: teachersList} = await apiService.get('/users/teachers');
-        console.log(teachersList);
         setTeachers(teachersList);
       } catch (err) {
         // Puedes mostrar un error si quieres

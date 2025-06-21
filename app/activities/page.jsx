@@ -34,6 +34,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { getStatusColor } from "../utils/activityUtils";
 import ClientDate from "../components/ClientDate";
 import AccessControl from "../components/AccessControl";
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
 const ActivitiesPage = () => {
   const router = useRouter();
@@ -170,6 +171,10 @@ const ActivitiesPage = () => {
 
   const handleDelete = async (id) => {
     setConfirmDelete({ open: true, id });
+  };
+
+  const handleRegisterParticipants = (id) => {
+    router.push(`/activities/${id}/register-participants`);
   };
 
   const handleConfirmDelete = async () => {
@@ -375,6 +380,13 @@ const ActivitiesPage = () => {
                   label: "Eliminar",
                   icon: DeleteIcon,
                   onClick: handleDelete,
+                  data: activity.id,
+                },
+                {
+                  id: "register-participants",
+                  label: "Registrar participantes",
+                  icon: PersonAddAltIcon,
+                  onClick: handleRegisterParticipants,
                   data: activity.id,
                 },
               ];

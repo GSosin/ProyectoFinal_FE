@@ -18,7 +18,6 @@ export default function TeacherProfilePage() {
       setLoading(true);
       try {
         const { data } = await apiService.get(`/users/${params.id}`);
-        console.log(data);
         setTeacher(data);
       } catch (err) {
         setError('Error al cargar el perfil del docente');

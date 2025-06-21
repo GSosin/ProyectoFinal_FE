@@ -34,7 +34,6 @@ export default function EditMyProfilePage() {
       setLoading(true);
       try {
         const {data} = await authEndpoints.getCurrentUser();
-        console.log(data);
         setUser(data);
         setFirstName(data.firstName || "");
         setLastName(data.lastName || "");
@@ -169,6 +168,7 @@ export default function EditMyProfilePage() {
                   onChange={e => setEmail(e.target.value)}
                   fullWidth
                   type="email"
+                  disabled
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
