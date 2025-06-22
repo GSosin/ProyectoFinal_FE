@@ -34,7 +34,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { getStatusColor } from "../utils/activityUtils";
 import ClientDate from "../components/ClientDate";
 import AccessControl from "../components/AccessControl";
-import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 
 const ActivitiesPage = () => {
   const router = useRouter();
@@ -44,13 +44,13 @@ const ActivitiesPage = () => {
   const [error, setError] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState({ open: false, id: null });
   const [searchFilters, setSearchFilters] = useState({
-    title: '',
-    category: '',
-    location: '',
-    status: ''
+    title: "",
+    category: "",
+    location: "",
+    status: "",
   });
-  const [orderBy, setOrderBy] = useState('startDate');
-  const [order, setOrder] = useState('desc');
+  const [orderBy, setOrderBy] = useState("startDate");
+  const [order, setOrder] = useState("desc");
 
   useEffect(() => {
     const fetchActivities = async () => {
@@ -71,35 +71,47 @@ const ActivitiesPage = () => {
 
   useEffect(() => {
     // Filtrar actividades cuando cambian los filtros
-    const filtered = activities.data?.filter(activity => {
+    const filtered = activities.data?.filter((activity) => {
       const searchTermLower = (term) => term.toLowerCase();
       return (
-        activity.title.toLowerCase().includes(searchTermLower(searchFilters.title)) &&
-        (activity.Category?.name || '').toLowerCase().includes(searchTermLower(searchFilters.category)) &&
-        (activity.Location?.name || '').toLowerCase().includes(searchTermLower(searchFilters.location)) &&
-        activity.status.toLowerCase().includes(searchTermLower(searchFilters.status))
+        activity.title
+          .toLowerCase()
+          .includes(searchTermLower(searchFilters.title)) &&
+        (activity.Category?.name || "")
+          .toLowerCase()
+          .includes(searchTermLower(searchFilters.category)) &&
+        (activity.Location?.name || "")
+          .toLowerCase()
+          .includes(searchTermLower(searchFilters.location)) &&
+        activity.status
+          .toLowerCase()
+          .includes(searchTermLower(searchFilters.status))
       );
     });
 
     // Aplicar ordenamiento
     const sorted = [...(filtered || [])].sort((a, b) => {
-      const isAsc = order === 'asc';
+      const isAsc = order === "asc";
       let comparison = 0;
 
       switch (orderBy) {
-        case 'title':
+        case "title":
           comparison = a.title.localeCompare(b.title);
           break;
-        case 'startDate':
+        case "startDate":
           comparison = new Date(a.startDate) - new Date(b.startDate);
           break;
-        case 'category':
-          comparison = (a.Category?.name || '').localeCompare(b.Category?.name || '');
+        case "category":
+          comparison = (a.Category?.name || "").localeCompare(
+            b.Category?.name || ""
+          );
           break;
-        case 'location':
-          comparison = (a.Location?.name || '').localeCompare(b.Location?.name || '');
+        case "location":
+          comparison = (a.Location?.name || "").localeCompare(
+            b.Location?.name || ""
+          );
           break;
-        case 'status':
+        case "status":
           comparison = a.status.localeCompare(b.status);
           break;
         default:
@@ -113,15 +125,15 @@ const ActivitiesPage = () => {
   }, [searchFilters, activities, orderBy, order]);
 
   const handleRequestSort = (property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
   const handleSearchChange = (field) => (event) => {
-    setSearchFilters(prev => ({
+    setSearchFilters((prev) => ({
       ...prev,
-      [field]: event.target.value
+      [field]: event.target.value,
     }));
   };
 
@@ -253,9 +265,11 @@ const ActivitiesPage = () => {
                 variant="outlined"
                 placeholder="Buscar por título..."
                 value={searchFilters.title}
-                onChange={handleSearchChange('title')}
+                onChange={handleSearchChange("title")}
                 InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -265,9 +279,11 @@ const ActivitiesPage = () => {
                 variant="outlined"
                 placeholder="Buscar por categoría..."
                 value={searchFilters.category}
-                onChange={handleSearchChange('category')}
+                onChange={handleSearchChange("category")}
                 InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -277,9 +293,11 @@ const ActivitiesPage = () => {
                 variant="outlined"
                 placeholder="Buscar por ubicación..."
                 value={searchFilters.location}
-                onChange={handleSearchChange('location')}
+                onChange={handleSearchChange("location")}
                 InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -289,9 +307,11 @@ const ActivitiesPage = () => {
                 variant="outlined"
                 placeholder="Buscar por estado..."
                 value={searchFilters.status}
-                onChange={handleSearchChange('status')}
+                onChange={handleSearchChange("status")}
                 InputProps={{
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
               />
             </Grid>
@@ -303,45 +323,45 @@ const ActivitiesPage = () => {
           <Grid container spacing={2}>
             <Grid item>
               <TableSortLabel
-                active={orderBy === 'title'}
-                direction={orderBy === 'title' ? order : 'asc'}
-                onClick={() => handleRequestSort('title')}
+                active={orderBy === "title"}
+                direction={orderBy === "title" ? order : "asc"}
+                onClick={() => handleRequestSort("title")}
               >
                 Título
               </TableSortLabel>
             </Grid>
             <Grid item>
               <TableSortLabel
-                active={orderBy === 'startDate'}
-                direction={orderBy === 'startDate' ? order : 'asc'}
-                onClick={() => handleRequestSort('startDate')}
+                active={orderBy === "startDate"}
+                direction={orderBy === "startDate" ? order : "asc"}
+                onClick={() => handleRequestSort("startDate")}
               >
                 Fecha
               </TableSortLabel>
             </Grid>
             <Grid item>
               <TableSortLabel
-                active={orderBy === 'category'}
-                direction={orderBy === 'category' ? order : 'asc'}
-                onClick={() => handleRequestSort('category')}
+                active={orderBy === "category"}
+                direction={orderBy === "category" ? order : "asc"}
+                onClick={() => handleRequestSort("category")}
               >
                 Categoría
               </TableSortLabel>
             </Grid>
             <Grid item>
               <TableSortLabel
-                active={orderBy === 'location'}
-                direction={orderBy === 'location' ? order : 'asc'}
-                onClick={() => handleRequestSort('location')}
+                active={orderBy === "location"}
+                direction={orderBy === "location" ? order : "asc"}
+                onClick={() => handleRequestSort("location")}
               >
                 Ubicación
               </TableSortLabel>
             </Grid>
             <Grid item>
               <TableSortLabel
-                active={orderBy === 'status'}
-                direction={orderBy === 'status' ? order : 'asc'}
-                onClick={() => handleRequestSort('status')}
+                active={orderBy === "status"}
+                direction={orderBy === "status" ? order : "asc"}
+                onClick={() => handleRequestSort("status")}
               >
                 Estado
               </TableSortLabel>
@@ -354,14 +374,16 @@ const ActivitiesPage = () => {
             <Typography variant="h6" color="text.secondary" gutterBottom>
               No hay actividades disponibles
             </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateActivity}
-              sx={{ mt: 2 }}
-            >
-              Crear la primera actividad
-            </Button>
+            <AccessControl permission="manage_activities">
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleCreateActivity}
+                sx={{ mt: 2 }}
+              >
+                Crear la primera actividad
+              </Button>
+            </AccessControl>
           </Box>
         ) : (
           <Grid container spacing={3}>
@@ -392,21 +414,29 @@ const ActivitiesPage = () => {
               ];
 
               return (
-                <Grid item xs={12} sm={6} md={4} key={activity.id} sx={{ display: 'flex', justifyContent: 'center' }}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  key={activity.id}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
                   <Card
                     className={styles.card}
                     sx={{
                       boxShadow: "0 6px 20px rgba(0,0,0,0.08)",
                       height: "400px",
-                      width: { xs: '100%', sm: '360px', md: '400px' },
-                      maxWidth: '100%',
+                      width: { xs: "100%", sm: "360px", md: "400px" },
+                      maxWidth: "100%",
                       display: "flex",
                       flexDirection: "column",
-                      transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                      transition:
+                        "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-4px)",
                         boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
-                      }
+                      },
                     }}
                   >
                     <CardActionArea
@@ -572,7 +602,13 @@ const ActivitiesPage = () => {
                             </Typography>
                           </Box>
                           <AccessControl permission="manage_activities">
-                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Box
+                              sx={{
+                                mt: 2,
+                                display: "flex",
+                                justifyContent: "flex-end",
+                              }}
+                            >
                               <ReusableMenu
                                 buttonText="Acciones"
                                 menuItems={simpleMenuItems}
