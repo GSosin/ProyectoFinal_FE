@@ -67,6 +67,8 @@ const ActivityDetail = () => {
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [enrollments, setEnrollments] = useState([]);
     const [enrollmentsLoading, setEnrollmentsLoading] = useState(false);
+    const [waitingList, setWaitingList] = useState([]);
+    const [waitingListLoading, setWaitingListLoading] = useState(false);
 
     const isActivityInProgress = activity && activity.status === 'En curso';
     const isActivityCompleted = activity && activity.status === 'Completada';
@@ -84,11 +86,10 @@ const ActivityDetail = () => {
         if (isActivityInProgress) return "No es posible inscribirse: la actividad está en curso";
         if (isActivityCompleted) return "No es posible inscribirse: la actividad ya ha finalizado";
         if (isActivityCancelled) return "No es posible inscribirse: la actividad ha sido cancelada";
-        if (isActivityFull) return "No es posible inscribirse: la actividad está llena";
         return "";
     };
 
-    const isRegistrationDisabled = isActivityInProgress || isActivityCompleted || isActivityCancelled || isActivityFull;
+    const isRegistrationDisabled = isActivityInProgress || isActivityCompleted || isActivityCancelled;
 
     useEffect(() => {
         const loadActivity = async () => {
@@ -130,6 +131,17 @@ const ActivityDetail = () => {
         }
     };
 
+    const loadWaitingList = async () => {
+        try {
+            setWaitingListLoading(true);
+            const response = await apiService.get(`/waiting-list/activity/${params.id}/my-position`);
+            setWaitingList(response.data || []);
+        } catch (err) {
+            console.error('Error loading waiting list:', err);
+        } finally {
+            setWaitingListLoading(false);
+        }
+    };
     useEffect(() => {
         const fetchTeachers = async () => {
             try {
@@ -140,6 +152,7 @@ const ActivityDetail = () => {
             }
         };
         fetchTeachers();
+        loadWaitingList();
     }, []);
 
     useEffect(() => {
@@ -150,16 +163,21 @@ const ActivityDetail = () => {
 
     const handleCancelEnrollment = async () => {
         try {
-            await apiService.delete(`/activities/${params.id}/enrollments/unsubscribe`);
+            let response;
+            if (isWaitingList) {
+                response = await apiService.delete(`/waiting-list/activity/${params.id}/leave`);
+            } else {
+                response = await apiService.delete(`/activities/${params.id}/enrollments/unsubscribe`);
+            }
             setIsEnrolled(false);
             setCancelDialogOpen(false);
             setSnackbar({
                 open: true,
-                message: 'Has cancelado tu inscripción exitosamente',
+                message: response.message || 'Has cancelado tu inscripción exitosamente',
                 severity: 'success'
             });
-            // Recargar inscripciones para actualizar el conteo
             await loadEnrollments();
+            await loadWaitingList();
         } catch (error) {
             setSnackbar({
                 open: true,
@@ -231,6 +249,8 @@ const ActivityDetail = () => {
     if (!activity) {
         return null;
     }
+
+    const isWaitingList = Object.keys(waitingList).length > 0;
 
     return (
         <Container maxWidth="md" className={styles.container} sx={{ py: 4 }}>
@@ -823,7 +843,7 @@ const ActivityDetail = () => {
                             </Box>
 
                             {isLoggedIn ? (
-                                isEnrolled ? (
+                                isEnrolled || isWaitingList ? (
                                     <Button 
                                         variant="contained" 
                                         color="error" 
@@ -845,7 +865,7 @@ const ActivityDetail = () => {
                                             }
                                         }}
                                     >
-                                        Cancelar inscripción
+                                        {isWaitingList ? 'Borrarme de la lista de espera' : 'Cancelar inscripción'}
                                     </Button>
                                 ) : (
                                     <Tooltip 
@@ -879,7 +899,7 @@ const ActivityDetail = () => {
                                                     }
                                                 }}
                                             >
-                                                Inscribirse a la actividad
+                                                {isActivityFull ? 'Inscribirse en la lista de espera' : 'Inscribirse a la actividad'}
                                             </Button>
                                         </Box>
                                     </Tooltip>
@@ -981,14 +1001,15 @@ const ActivityDetail = () => {
                 activity={activity}
                 open={registrationDialogOpen}
                 onClose={() => setRegistrationDialogOpen(false)}
-                onSuccess={async () => {
+                onSuccess={async (message) => {
                     setRegistrationDialogOpen(false);
                     setIsEnrolled(true);
                     // Recargar inscripciones para actualizar el conteo
                     await loadEnrollments();
+                    await loadWaitingList();
                     setSnackbar({
                         open: true,
-                        message: '¡Inscripción exitosa! Te enviaremos un correo con los detalles.',
+                        message: message || '¡Inscripción exitosa! Te enviaremos un correo con los detalles.',
                         severity: 'success'
                     });
                 }}

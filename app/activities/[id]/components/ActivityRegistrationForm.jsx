@@ -28,8 +28,8 @@ const ActivityRegistrationForm = ({ activity, open, onClose, onSuccess }) => {
         setLoading(true);
         setError(null);
         try {
-            await apiService.post(`/activities/${activity.id}/register`, { comments });
-            onSuccess?.();
+            const response = await apiService.post(`/activities/${activity.id}/register`, { comments });
+            onSuccess?.(response.message);
             onClose();
         } catch (error) {
             setError(error.response?.data?.message || 'Error al inscribirse en la actividad');

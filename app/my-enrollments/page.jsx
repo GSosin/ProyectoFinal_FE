@@ -51,7 +51,6 @@ export default function MyEnrollmentsPage() {
     try {
       setLoading(true);
       const response = await apiService.get('/enrollments/own');
-      console.log(response);
       setEnrollments(response.data || []);
     } catch (err) {
       setError('Error al cargar tus inscripciones');
