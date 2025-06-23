@@ -1,3 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* FullCalendar CSS */
+@import '@fullcalendar/core/index.css';
+@import '@fullcalendar/daygrid/index.css';
+@import '@fullcalendar/timegrid/index.css';
+
 * {
     box-sizing: border-box;
     margin: 0;
