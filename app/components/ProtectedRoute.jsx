@@ -48,7 +48,6 @@ const ProtectedRoute = ({ children, requiredRole, requiredPermissions = [] }) =>
     if (requiredRole && user?.role?.name !== requiredRole) {
         return null;
     }
-    debugger
     if (
         requiredPermissions.length > 0 &&
         !requiredPermissions.some(permission => {
