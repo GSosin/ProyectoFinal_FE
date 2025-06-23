@@ -221,7 +221,9 @@ export default function Header() {
                 color="inherit"
                 onClick={() => handleMenuClick("/admin")}
                 sx={{
-                  fontWeight: pathname.startsWith("/admin") ? 600 : 400,
+                  fontWeight: pathname.startsWith("/admin")
+                    ? 600
+                    : 400,
                   color: pathname.startsWith("/admin")
                     ? theme.primary.main
                     : theme.text.secondary,
@@ -242,6 +244,37 @@ export default function Header() {
                 }}
               >
                 Admin
+              </Button>
+            )}
+            {user?.roleId === 2 && (
+              <Button
+                key="teacher-panel"
+                color="inherit"
+                onClick={() => handleMenuClick("/teachers")}
+                sx={{
+                  fontWeight: pathname.startsWith("/teachers")
+                    ? 600
+                    : 400,
+                  color: pathname.startsWith("/teachers")
+                    ? theme.primary.main
+                    : theme.text.secondary,
+                  borderBottom: pathname.startsWith("/teachers")
+                    ? `2px solid ${theme.primary.main}`
+                    : "none",
+                  borderRadius: "4px 4px 0 0",
+                  px: 2,
+                  py: 1,
+                  textTransform: "none",
+                  fontSize: "1rem",
+                  transition: "all 0.2s",
+                  "&:hover": {
+                    color: theme.primary.main,
+                    backgroundColor: `${theme.primary.main}08`,
+                    borderBottom: `2px solid ${theme.primary.main}40`,
+                  },
+                }}
+              >
+                Mi Panel
               </Button>
             )}
           </Box>
@@ -308,6 +341,14 @@ export default function Header() {
                 }}>
                   Mis Inscripciones
                 </MenuItem>
+                {user?.roleId === 2 && (
+                  <MenuItem onClick={() => {
+                    handleProfileMenuClose();
+                    router.push('/teachers/calendar');
+                  }}>
+                    Mi Calendario
+                  </MenuItem>
+                )}
                 <MenuItem onClick={handleLogout}>Salir</MenuItem>
               </Menu>
             </Box>
