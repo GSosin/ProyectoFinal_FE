@@ -302,6 +302,12 @@ export default function Header() {
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
                 <MenuItem onClick={handleProfileClick}>Mi Perfil</MenuItem>
+                <MenuItem onClick={() => {
+                  handleProfileMenuClose();
+                  router.push('/my-enrollments');
+                }}>
+                  Mis Inscripciones
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>Salir</MenuItem>
               </Menu>
             </Box>
