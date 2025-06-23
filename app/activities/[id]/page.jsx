@@ -65,25 +65,39 @@ const ActivityDetail = () => {
     const [editLoading, setEditLoading] = useState(false);
     const [teachers, setTeachers] = useState([]);
     const [selectedTeacher, setSelectedTeacher] = useState('');
+    const [enrollments, setEnrollments] = useState([]);
+    const [enrollmentsLoading, setEnrollmentsLoading] = useState(false);
 
     const isActivityInProgress = activity && activity.status === 'En curso';
     const isActivityCompleted = activity && activity.status === 'Completada';
     const isActivityCancelled = activity && activity.status === 'Cancelada';
 
+    // Calcular inscripciones activas
+    const activeEnrollments = enrollments.filter(enrollment => 
+        enrollment.status.toLowerCase() === 'activa'
+    ).length;
+
+    // Verificar si la actividad está llena
+    const isActivityFull = activity && activeEnrollments >= activity.maxCapacity;
+
     const getActivityStatusMessage = () => {
         if (isActivityInProgress) return "No es posible inscribirse: la actividad está en curso";
         if (isActivityCompleted) return "No es posible inscribirse: la actividad ya ha finalizado";
         if (isActivityCancelled) return "No es posible inscribirse: la actividad ha sido cancelada";
+        if (isActivityFull) return "No es posible inscribirse: la actividad está llena";
         return "";
     };
 
-    const isRegistrationDisabled = isActivityInProgress || isActivityCompleted || isActivityCancelled;
+    const isRegistrationDisabled = isActivityInProgress || isActivityCompleted || isActivityCancelled || isActivityFull;
 
     useEffect(() => {
         const loadActivity = async () => {
             try {
                 const data = await apiService.get(`/activities/${params.id}`);
                 setActivity(data);
+                
+                // Cargar inscripciones de la actividad
+                await loadEnrollments();
                 
                 if (isLoggedIn && user) {
                     try {
@@ -103,6 +117,18 @@ const ActivityDetail = () => {
 
         loadActivity();
     }, [params.id, isLoggedIn, user]);
+
+    const loadEnrollments = async () => {
+        try {
+            setEnrollmentsLoading(true);
+            const response = await apiService.get(`/activities/${params.id}/enrollments`);
+            setEnrollments(response.data || []);
+        } catch (err) {
+            console.error('Error loading enrollments:', err);
+        } finally {
+            setEnrollmentsLoading(false);
+        }
+    };
 
     useEffect(() => {
         const fetchTeachers = async () => {
@@ -132,6 +158,8 @@ const ActivityDetail = () => {
                 message: 'Has cancelado tu inscripción exitosamente',
                 severity: 'success'
             });
+            // Recargar inscripciones para actualizar el conteo
+            await loadEnrollments();
         } catch (error) {
             setSnackbar({
                 open: true,
@@ -612,8 +640,16 @@ const ActivityDetail = () => {
                                     </Typography>
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Typography variant="body1" fontWeight="medium">
-                                            Capacidad máxima: {activity.maxCapacity} personas
+                                            {activeEnrollments} / {activity.maxCapacity} inscritos
                                         </Typography>
+                                        {isActivityFull && (
+                                            <Chip 
+                                                label="Llena" 
+                                                color="error" 
+                                                size="small"
+                                                sx={{ fontWeight: 500 }}
+                                            />
+                                        )}
                                         <AccessControl permission="manage_activities">
                                             <IconButton 
                                                 size="small" 
@@ -633,6 +669,11 @@ const ActivityDetail = () => {
                                             </IconButton>
                                         </AccessControl>
                                     </Box>
+                                    {!enrollmentsLoading && (
+                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                            {activity.maxCapacity - activeEnrollments} cupos disponibles
+                                        </Typography>
+                                    )}
                                 </Box>
                             </Box>
 
@@ -940,9 +981,11 @@ const ActivityDetail = () => {
                 activity={activity}
                 open={registrationDialogOpen}
                 onClose={() => setRegistrationDialogOpen(false)}
-                onSuccess={() => {
+                onSuccess={async () => {
                     setRegistrationDialogOpen(false);
                     setIsEnrolled(true);
+                    // Recargar inscripciones para actualizar el conteo
+                    await loadEnrollments();
                     setSnackbar({
                         open: true,
                         message: '¡Inscripción exitosa! Te enviaremos un correo con los detalles.',
